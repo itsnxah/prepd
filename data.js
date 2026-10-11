@@ -156,7 +156,7 @@ window.PREPD = {
     },
     {
       id: 'putengeschnetzeltes',
-      bild: 'bilder/Pilz-Kartoffel.jpg',
+      bild: 'bilder/putengeschnetzeltes.jpg',
       name: 'Puten­geschnetzeltes mit Champignons und Kartoffeln',
       portionen: 2, zeit: 30, mealPrep: true, haltbar: 3,
       zutaten: [
