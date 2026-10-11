@@ -95,6 +95,7 @@ window.PREPD = {
   rezepte: [
     {
       id: 'big-mac-bowl',
+      bild: 'bilder/big-mac-bowl.jpg',
       name: 'Big-Mac-Bowl mit Tomaten und Mais',
       portionen: 2, zeit: 25, mealPrep: true, haltbar: 2,
       zutaten: [
@@ -116,6 +117,7 @@ window.PREPD = {
     },
     {
       id: 'hackfleisch-bowl',
+      bild: 'bilder/hackfleisch-bowl.jpg',
       name: 'Klassische Hackfleisch-Bowl',
       portionen: 2, zeit: 15, mealPrep: true, haltbar: 3,
       zutaten: [
@@ -131,6 +133,7 @@ window.PREPD = {
     },
     {
       id: 'haehnchen-paprika-reis',
+      bild: 'bilder/haehnchen-paprika-reis.jpg',
       name: 'Hähnchen-Paprika-Pfanne mit Reis',
       portionen: 2, zeit: 25, mealPrep: true, haltbar: 3,
       zutaten: [
@@ -179,6 +182,7 @@ window.PREPD = {
     },
     {
       id: 'putengeschnetzeltes',
+      bild: 'bilder/putengeschnetzeltes.jpg',
       name: 'Puten­geschnetzeltes mit Champignons und Kartoffeln',
       portionen: 2, zeit: 30, mealPrep: true, haltbar: 3,
       zutaten: [
