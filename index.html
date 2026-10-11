@@ -237,6 +237,8 @@
   .posten.erledigt .posten-name { text-decoration: line-through; text-decoration-color: var(--tinte-3); color: var(--tinte-3); }
   .herkunft { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
   .herkunft span { font-size: 12px; line-height: 1.55; color: var(--tinte-2); background: var(--creme); border-radius: 6px; padding: 2px 7px; }
+  .herkunft span.rez { background: var(--terrakotta-hell); color: var(--terrakotta-dunkel); }
+  .herkunft span.selbst { background: none; border: 1px dashed var(--rahmen); color: var(--tinte-2); }
   .herkunft span.hinweis { background: none; padding: 0; color: var(--tinte-3); font-style: italic; }
   .menge {
     border: 1px solid var(--linie); background: var(--creme); border-radius: 10px;
@@ -1137,7 +1139,7 @@
           <div>
             <div class="posten-name">${esc(p.lm.name)}</div>
             <div class="herkunft">
-              ${quellen.map(q => `<span>${esc(q)}</span>`).join('')}
+              ${quellen.map(q => `<span class="rez">aus ${esc(q)}</span>`).join('')}
               ${p.lm.basic ? '<span class="hinweis">hast du wahrscheinlich schon</span>' : ''}
             </div>
           </div>
@@ -1161,31 +1163,46 @@
       <div class="posten${fertig ? ' erledigt' : ''}">
         <div class="posten-zeile">
           <button class="haken" data-haken="${key}" aria-pressed="${fertig}" aria-label="${esc(e.text)} abhaken">${ICON.haken}</button>
-          <div><div class="posten-name">${esc(e.text)}</div></div>
+          <div><div class="posten-name">${esc(e.text)}</div><div class="herkunft"><span class="selbst">selbst hinzugefügt</span></div></div>
           <button class="x" data-eigener-weg="${e.id}" aria-label="${esc(e.text)} löschen">${ICON.x}</button>
         </div>
       </div>`;
+  };
+
+  /* Supermarkt-Bereich für selbst geschriebene Posten: erst bekannte Lebensmittel, dann Stichwörter */
+  const GANG_WOERTER = {
+    'Obst & Gemüse': ['apfel', 'äpfel', 'banane', 'tomate', 'gurke', 'paprika', 'zwiebel', 'knoblauch', 'salat', 'kartoffel', 'karotte', 'möhre', 'pilz', 'champignon', 'zitrone', 'limette', 'orange', 'beere', 'avocado', 'obst', 'gemüse', 'spinat', 'lauch', 'ingwer', 'petersilie', 'basilikum', 'kräuter', 'mais', 'birne', 'traube', 'melone', 'kürbis', 'sellerie', 'radieschen', 'rucola', 'mango', 'ananas', 'kiwi', 'pfirsich'],
+    'Fleisch & Fisch': ['hack', 'hähnchen', 'huhn', 'pute', 'rind', 'schwein', 'steak', 'wurst', 'schinken', 'speck', 'salami', 'lachs', 'fisch', 'thunfisch', 'garnele', 'fleisch', 'bacon', 'filet', 'schnitzel', 'bratwurst'],
+    'Kühlregal': ['milch', 'joghurt', 'quark', 'käse', 'butter', 'sahne', 'eier', 'skyr', 'frischkäse', 'mozzarella', 'parmesan', 'margarine', 'pudding', 'schmand', 'kefir', 'hummus', 'tofu'],
+    'Konserven & Vorrat': ['reis', 'nudel', 'pasta', 'spaghetti', 'mehl', 'zucker', 'dose', 'konserve', 'linsen', 'bohnen', 'haferflocken', 'müsli', 'cornflakes', 'kaffee', 'tee', 'kakao', 'nüsse', 'honig', 'marmelade', 'tomatenmark', 'passiert', 'brühe', 'soße', 'sauce', 'ketchup', 'senf', 'mayo', 'erdnussbutter', 'nutella', 'chips', 'schokolade', 'kekse', 'saft', 'wasser', 'cola', 'bier', 'wein'],
+    'Gewürze & Öl': ['salz', 'pfeffer', 'gewürz', 'curry', 'zimt', 'oregano', 'öl', 'essig'],
+  };
+  const gangFuer = e => {
+    if (e.gang && D.GAENGE.includes(e.gang)) return e.gang;
+    const t = e.text.toLowerCase();
+    const lm = D.lebensmittel.find(l => t.includes(l.name.toLowerCase().replace(/­/g, '')) || (l.kw && t.includes(String(l.kw).toLowerCase())));
+    if (lm) return lm.gang;
+    for (const g of D.GAENGE) if ((GANG_WOERTER[g] || []).some(w => t.includes(w))) return g;
+    return 'Sonstiges';
   };
 
   const einkaufZeigen = () => {
     const posten = listenPosten();
     const normal = posten.filter(p => !p.lm.basic), basics = posten.filter(p => p.lm.basic);
     const nachGang = {};
-    normal.forEach(p => (nachGang[p.lm.gang] ||= []).push(p));
-    const sortiere = arr => arr.sort((a, b) => (!!Z.erledigt['lm:' + a.id] - !!Z.erledigt['lm:' + b.id]) || a.lm.name.localeCompare(b.lm.name, 'de'));
+    normal.forEach(p => (nachGang[p.lm.gang] ||= []).push({ art: 'lm', p, name: p.lm.name, fertig: !!Z.erledigt['lm:' + p.id] }));
+    Z.eigene.forEach(e => (nachGang[gangFuer(e)] ||= []).push({ art: 'c', e, name: e.text, fertig: !!Z.erledigt['c:' + e.id] }));
+    const sortiere = arr => arr.sort((a, b) => (a.fertig - b.fertig) || a.name.localeCompare(b.name, 'de'));
+    const sortiereLm = arr => arr.sort((a, b) => (!!Z.erledigt['lm:' + a.id] - !!Z.erledigt['lm:' + b.id]) || a.lm.name.localeCompare(b.lm.name, 'de'));
 
     let html = '';
     for (const gang of D.GAENGE) {
       const arr = nachGang[gang]; if (!arr) continue;
-      const offenAnz = arr.filter(p => !Z.erledigt['lm:' + p.id]).length;
-      html += `<section class="gruppe"><h2 class="gruppe-titel">${esc(gang)} <span>${offenAnz} offen</span></h2><div class="liste">${sortiere(arr).map(postenHTML).join('')}</div></section>`;
-    }
-    if (Z.eigene.length) {
-      const eig = [...Z.eigene].sort((a, b) => !!Z.erledigt['c:' + a.id] - !!Z.erledigt['c:' + b.id]);
-      html += `<section class="gruppe"><h2 class="gruppe-titel">Selbst dazugeschrieben</h2><div class="liste">${eig.map(eigenerHTML).join('')}</div></section>`;
+      const offenAnz = arr.filter(x => !x.fertig).length;
+      html += `<section class="gruppe"><h2 class="gruppe-titel">${esc(gang)} <span>${offenAnz} offen</span></h2><div class="liste">${sortiere(arr).map(x => x.art === 'lm' ? postenHTML(x.p) : eigenerHTML(x.e)).join('')}</div></section>`;
     }
     if (basics.length) {
-      html += `<section class="gruppe basics"><h2 class="gruppe-titel">Wahrscheinlich schon zuhause <span>kurz nachschauen</span></h2><div class="liste">${sortiere(basics).map(postenHTML).join('')}</div></section>`;
+      html += `<section class="gruppe basics"><h2 class="gruppe-titel">Wahrscheinlich schon zuhause <span>kurz nachschauen</span></h2><div class="liste">${sortiereLm(basics).map(postenHTML).join('')}</div></section>`;
     }
     if (!html) {
       html = `<div class="leer"><strong>Deine Liste ist leer</strong>Tipp im Rezeptbuch auf das Plus bei einem Gericht oder schreib oben etwas dazu.</div>`;
