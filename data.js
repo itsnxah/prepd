@@ -101,7 +101,7 @@ window.PREPD = {
   ],
 
   // Noahs Auswahl: bis zu drei Lieblingsgerichte (IDs), erscheinen ganz oben im Rezeptbuch.
-  favoriten: ['joghurt-haehnchen-pfanne', 'big-mac-bowl', 'hackfleisch-bowl'],
+  favoriten: ['joghurt-haehnchen-pfanne', 'marry-me-chicken', 'hackfleisch-bowl'],
 
   rezepte: [
     {
