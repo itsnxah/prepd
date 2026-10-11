@@ -1603,7 +1603,7 @@
       try {
         const a = await Wolke.ki({ text, bild: bild ? { typ: bild.typ, daten: bild.daten } : undefined });
         if (a.ok) { erkannt = a.posten; if (!erkannt.length) fehler('Ich habe nichts zum Einkaufen gefunden.'); zeigeErgebnis(); }
-        else fehler(({ sitzung: 'Bitte neu anmelden.', konfiguration: 'Der KI-Zugang ist noch nicht eingerichtet.', leer: 'Füg erst einen Text oder ein Bild ein.', bild: 'Das Bild ist zu groß oder hat ein falsches Format.', ki: 'Die KI ist gerade nicht erreichbar.' })[a.fehler] || 'Das hat nicht geklappt.');
+        else fehler(({ sitzung: 'Bitte neu anmelden.', konfiguration: 'Der KI-Zugang ist noch nicht eingerichtet.', leer: 'Füg erst einen Text oder ein Bild ein.', bild: 'Das Bild ist zu groß oder hat ein falsches Format.', ki: 'Die KI ist gerade nicht erreichbar.' })[a.fehler] || ('Das hat nicht geklappt' + (a.detail ? ' (' + a.detail + ')' : '') + '.'));
       } catch (e) { console.error('Import', e); fehler('Keine Verbindung (' + (e && e.message ? e.message : e) + '). Bitte später nochmal.'); }
       knopf.disabled = false; if (!erkannt.length) knopf.textContent = 'Erkennen';
     };
