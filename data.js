@@ -252,6 +252,7 @@ window.PREPD = {
       id: 'bulking-steak-bowl',
       name: 'Bulking Steak Bowl mit knusprigen Kartoffeln',
       portionen: 1, zeit: 35, mealPrep: true, haltbar: 3,
+      tiktok: 'https://www.tiktok.com/@jelly12h/video/7508380928465505558',
       zutaten: [
         ['huefte', 250], ['kartoffeln', 300], ['olivenoel', 0.5], ['rosmarin', 0.5], ['knoblauchpulver', 0.5],
         ['oregano', 0.5], ['salz', 0.25], ['cayenne', 0.25], ['petersilie', 5], ['joghurt-griechisch', 50],
