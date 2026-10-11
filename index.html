@@ -355,6 +355,13 @@
   .imp-liste input { width: 20px; height: 20px; accent-color: var(--terrakotta); flex: none; }
   .imp-liste label { flex: 1; }
   .imp-fehler { color: #a63a1d; font-size: 14px; margin: 8px 0 0; min-height: 1.2em; }
+  .verw-zeile { display: flex; gap: 10px; align-items: center; padding: 10px 4px; border-top: 1px solid var(--linie); }
+  .verw-zeile > div { flex: 1; min-width: 0; }
+  .verw-zeile small { display: block; color: var(--tinte-3); font-size: 12px; }
+  .verw-zeile .knopf { padding: 8px 14px; font-size: 14px; }
+  .verw-wartet strong::after { content: ' · wartet'; color: var(--terrakotta); font-weight: 600; }
+  .konto-menue button.verw-knopf { margin-bottom: 8px; }
+  .konto-punkt-neu { display: inline-block; min-width: 18px; height: 18px; line-height: 18px; margin-left: 6px; border-radius: 9px; background: var(--terrakotta); color: #fff; font-size: 11px; text-align: center; }
   .imp-aktionen { display: flex; gap: 10px; margin-top: 14px; }
   .imp-aktionen .knopf { flex: 1; }
   .merk-seite { max-width: 720px; }
@@ -469,6 +476,7 @@
       <button class="konto-knopf" id="konto-knopf" type="button" aria-haspopup="true"><span class="konto-punkt" id="konto-punkt"></span><span id="konto-name"></span></button>
       <div class="konto-menue" id="konto-menue">
         <p id="konto-status"></p>
+        <button type="button" class="verw-knopf" id="verw-oeffnen" hidden>Benutzer verwalten <span class="konto-punkt-neu" id="verw-anzahl" hidden></span></button>
         <button type="button" id="abmelden">Abmelden</button>
       </div>
     </div>
@@ -595,6 +603,15 @@
 <div class="schleier" id="schleier" hidden></div>
 <div class="blatt" id="blatt" role="dialog" aria-modal="true" aria-labelledby="blatt-titel" hidden></div>
 <section class="koch" id="koch" aria-label="Kochmodus" hidden></section>
+<div class="import" id="verw" role="dialog" aria-modal="true" aria-labelledby="verw-titel">
+  <div class="imp-karte">
+    <h2 id="verw-titel">Benutzer verwalten</h2>
+    <p class="klein">Neue Konten sehen nichts, bis du sie freigibst. Sperren meldet das Konto sofort ab.</p>
+    <p class="imp-fehler" id="verw-fehler" role="alert"></p>
+    <div id="verw-liste"></div>
+    <div class="imp-aktionen"><button class="knopf zweit" type="button" id="verw-zu">Schließen</button></div>
+  </div>
+</div>
 <div class="import" id="import" role="dialog" aria-modal="true" aria-labelledby="imp-titel">
   <div class="imp-karte">
     <h2 id="imp-titel">Aus Text oder Bild</h2>
@@ -735,6 +752,7 @@
       if (!sitz) { $('#konto').hidden = true; return; }
       $('#konto').hidden = false;
       $('#konto-name').textContent = sitz.name;
+      $('#verw-oeffnen').hidden = !sitz.admin;
       const p = $('#konto-punkt');
       const t = offline ? 'Offline – wird nachgeholt' : (schmutzig || sendet) ? 'Speichert …' : 'Synchron auf allen Geräten';
       p.className = 'konto-punkt' + (offline ? ' aus' : (schmutzig || sendet) ? ' arbeit' : '');
@@ -758,13 +776,14 @@
 
     /* ---------- Sitzung ---------- */
     function uebernehmen(antwort) {
-      sitz = { token: antwort.token, name: antwort.name };
+      sitz = { token: antwort.token, name: antwort.name, admin: !!antwort.admin };
       schreib(SK, sitz);
       Speicher.schluessel = 'prepd-liste-v1:' + sitz.name;
       rev = antwort.rev; basis = klon(Object.assign(leererZustand(), antwort.zustand || {}));
       Z = klon(basis);
       Speicher.speichern(Z); schreib('prepd-basis:' + sitz.name, { rev, basis });
       schmutzig = false; Sync = api; maske(false); zeigeStatus(); alles(); beginnePolling();
+      if (sitz.admin) verwaltungZaehlen();
     }
     function raus(grund) {
       if (sitz) { try { rpc('prepd_abmelden', { p_token: sitz.token }).catch(() => {}); } catch (e) {} }
@@ -791,8 +810,10 @@
             gross: 'Die Liste ist zu groß.',
             falsch: 'Name oder Passwort stimmt nicht.',
             gesperrt: 'Zu viele Versuche. Bitte in 15 Minuten nochmal.',
+            wartet: modus === 'neu' ? 'Konto angelegt. Es muss erst freigegeben werden, danach kannst du dich anmelden.' : 'Dein Konto wartet noch auf Freigabe.',
           })[a.fehler] || 'Das hat nicht geklappt.';
         } else { $('#an-pw').value = ''; uebernehmen(a); }
+        if (a.fehler === 'wartet' && modus !== 'an') { setzeModus('an'); f.textContent = 'Konto angelegt. Es muss erst freigegeben werden, danach kannst du dich anmelden.'; }
       } catch (e) { f.textContent = 'Keine Verbindung. Bitte später nochmal.'; }
       knopf.disabled = false;
     }
@@ -825,6 +846,8 @@
         const a = await rpc('prepd_laden', { p_token: sitz.token });
         if (a.fehler === 'sitzung') return raus('Bitte neu anmelden.');
         offline = false;
+        if (!!a.admin !== !!sitz.admin) { sitz.admin = !!a.admin; schreib(SK, sitz); }
+        if (sitz.admin) verwaltungZaehlen();
         if (a.rev !== rev && !schmutzig && !sendet) {
           const serv = Object.assign(leererZustand(), a.zustand || {});
           Z = klon(serv); rev = a.rev; basis = klon(serv);
@@ -841,6 +864,7 @@
     function start() {
       if (!aktiv) return;                       // ohne config.js: rein lokal
       $('#an-form').addEventListener('submit', absenden);
+      verwaltungStart();
       document.querySelectorAll('.an-reiter button').forEach(b => b.addEventListener('click', () => setzeModus(b.dataset.modus)));
       $('#konto-knopf').addEventListener('click', e => { e.stopPropagation(); $('#konto-menue').classList.toggle('offen'); });
       document.addEventListener('click', e => { if (!e.target.closest('#konto')) $('#konto-menue').classList.remove('offen'); });
@@ -857,6 +881,49 @@
       Sync = api; zeigeStatus(); alles(); beginnePolling();
       // Beim Start: Ungesendetes (Z ≠ Basis) hochladen, sonst neuen Stand holen
       if (!gleich(Z, basis)) { schmutzig = true; senden(); } else holen();
+    }
+    /* ---------- Verwaltung (nur Admin) ---------- */
+    async function verwaltungHolen() {
+      if (!sitz) return null;
+      try { const a = await rpc('prepd_verwaltung', { p_token: sitz.token }); return a.ok ? a.konten : null; } catch (e) { return null; }
+    }
+    async function verwaltungZaehlen() {
+      const k = await verwaltungHolen(); if (!k) return;
+      const n = k.filter(x => !x.freigegeben).length, b = $('#verw-anzahl');
+      b.textContent = n; b.hidden = !n;
+    }
+    async function verwaltungZeigen() {
+      const liste = $('#verw-liste'), f = $('#verw-fehler');
+      f.textContent = ''; liste.innerHTML = '<p class="klein">Lade …</p>';
+      const k = await verwaltungHolen();
+      if (!k) { liste.innerHTML = ''; f.textContent = 'Das konnte nicht geladen werden.'; return; }
+      liste.innerHTML = k.map(x => `
+        <div class="verw-zeile${x.freigegeben ? '' : ' verw-wartet'}">
+          <div><strong>${esc(x.name)}</strong><small>${x.admin ? 'Admin' : 'seit ' + new Date(x.erstellt).toLocaleDateString('de-DE')}</small></div>
+          ${x.admin || x.name === sitz.name ? '' : x.freigegeben
+            ? `<button class="knopf zweit" data-verw="${esc(x.name)}" data-ja="0">Sperren</button>`
+            : `<button class="knopf terra" data-verw="${esc(x.name)}" data-ja="1">Freigeben</button>`}
+        </div>`).join('');
+      const n = k.filter(x => !x.freigegeben).length, b = $('#verw-anzahl');
+      b.textContent = n; b.hidden = !n;
+    }
+    function verwaltungStart() {
+      $('#verw-oeffnen').addEventListener('click', () => {
+        $('#konto-menue').classList.remove('offen');
+        $('#verw').classList.add('zeigen'); document.body.style.overflow = 'hidden'; verwaltungZeigen();
+      });
+      const zu = () => { $('#verw').classList.remove('zeigen'); document.body.style.overflow = ''; };
+      $('#verw-zu').addEventListener('click', zu);
+      $('#verw').addEventListener('click', e => { if (e.target.id === 'verw') zu(); });
+      $('#verw-liste').addEventListener('click', async e => {
+        const b = e.target.closest('[data-verw]'); if (!b) return;
+        b.disabled = true;
+        try {
+          const a = await rpc('prepd_freigabe', { p_token: sitz.token, p_name: b.dataset.verw, p_ja: b.dataset.ja === '1' });
+          if (!a.ok) $('#verw-fehler').textContent = 'Das hat nicht geklappt.';
+        } catch (err) { $('#verw-fehler').textContent = 'Keine Verbindung.'; }
+        verwaltungZeigen();
+      });
     }
     async function ki(body) {
       if (!sitz) return { fehler: 'sitzung' };
