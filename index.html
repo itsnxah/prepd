@@ -13,6 +13,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('prepd-thema'); } catch (e) {}
+    if (t !== 'hell' && t !== 'dunkel') t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dunkel' : 'hell';
+    document.documentElement.setAttribute('data-theme', t === 'dunkel' ? 'dark' : 'light');
+  })();
+</script>
 <style>
   :root {
     --creme: #FAF5EA;
@@ -30,10 +38,52 @@
     --salbei-hell: #E4ECDC;
     --honig: #DE9B2F;
     --honig-hell: #FBEACB;
+    --feld: #FFFFFF;
+    --gedaempft: #7A6C5E;
+    --fehler: #A63A1D;
+    --honig-text: #7A520F;
+    --gruppe-bg: #F4EFE3;
+    --platz-bg: #ECE8DF;
+    --platz-fg: #B3AD9F;
+    --zeit: #8A7D6E;
+    --aus: #B9AFA0;
+    --dimmer: rgba(45, 42, 34, .42);
+    color-scheme: light;
     --schatten: 0 1px 0 rgba(84, 60, 30, .05), 0 10px 28px -18px rgba(84, 60, 30, .35);
     --font: "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --nav-h: 68px;
   }
+
+  :root[data-theme="dark"] {
+    --creme: #1B1713;
+    --papier: #26211B;
+    --tinte: #F3ECDF;
+    --tinte-2: #C0B6A4;
+    --tinte-3: #8B8171;
+    --linie: #393229;
+    --rahmen: #4A4236;
+    --terrakotta: #C95B34;
+    --terrakotta-dunkel: #F2A582;
+    --terrakotta-hell: #3B2A21;
+    --salbei: #5F8454;
+    --salbei-dunkel: #AECB9F;
+    --salbei-hell: #27352A;
+    --honig: #E0A33A;
+    --honig-hell: #3C3220;
+    --honig-text: #F1CA7C;
+    --feld: #2F2921;
+    --gedaempft: #B5A996;
+    --fehler: #FF9477;
+    --gruppe-bg: #211C16;
+    --platz-bg: #2B2620;
+    --platz-fg: #5C5346;
+    --zeit: #A29887;
+    --aus: #6B6354;
+    --dimmer: rgba(0, 0, 0, .62);
+    color-scheme: dark;
+    --schatten: 0 1px 0 rgba(0, 0, 0, .3), 0 10px 28px -16px rgba(0, 0, 0, .75);
+  }
+  :root[data-theme="dark"] .kachel-bild img, :root[data-theme="dark"] .blatt-bild img { filter: brightness(.94); }
 
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
@@ -152,7 +202,7 @@
   .kachel-oeffnen { position: absolute; inset: 0; z-index: 1; border: 0; background: none; }
   .kachel-bild { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--creme); }
   .kachel-bild img, .blatt-bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-  .platzhalter { position: absolute; inset: 0; display: grid; place-items: center; background: #ECE8DF; color: #B3AD9F; }
+  .platzhalter { position: absolute; inset: 0; display: grid; place-items: center; background: var(--platz-bg); color: var(--platz-fg); }
   .platzhalter svg { width: 38%; max-width: 76px; height: auto; }
   .kachel-text { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 7px; flex: 1; pointer-events: none; }
   .kachel-name {
@@ -171,7 +221,7 @@
   }
   .marke-klein svg { width: 12px; height: 12px; flex: none; }
   .marke-klein.prep { background: var(--salbei-hell); color: var(--salbei-dunkel); }
-  .marke-klein.teilt { background: var(--honig-hell); color: #7A520F; }
+  .marke-klein.teilt { background: var(--honig-hell); color: var(--honig-text); }
 
   .bild-fahne {
     position: absolute; z-index: 2; left: 9px; top: 9px;
@@ -218,7 +268,7 @@
   .knopf:disabled { opacity: .45; cursor: default; }
   .knopf-text { border: 0; background: none; color: var(--tinte-2); font-weight: 600; font-size: 14px; padding: 8px 4px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--linie); }
 
-  .gruppe { margin-bottom: 14px; border: 1.5px solid var(--rahmen); background: #F4EFE3; border-radius: 24px; padding: 14px 12px 12px; }
+  .gruppe { margin-bottom: 14px; border: 1.5px solid var(--rahmen); background: var(--gruppe-bg); border-radius: 24px; padding: 14px 12px 12px; }
   .gruppe-titel { font-size: 15px; font-weight: 700; color: var(--tinte-2); margin: 0 0 10px 4px; display: flex; align-items: baseline; gap: 8px; }
   .gruppe-titel span { font-weight: 500; color: var(--tinte-3); font-size: 13px; }
   .liste { background: var(--papier); border: 1px solid var(--linie); border-radius: 16px; overflow: hidden; }
@@ -286,7 +336,7 @@
   @media (max-width: 480px) { .lm-werte .nebenwert { display: none; } }
 
   /* ---------- Rezept-Detail ---------- */
-  .schleier { position: fixed; inset: 0; z-index: 50; background: rgba(45, 42, 34, .38); opacity: 0; transition: opacity .25s; }
+  .schleier { position: fixed; inset: 0; z-index: 50; background: var(--dimmer); opacity: 0; transition: opacity .25s; }
   .schleier.offen { opacity: 1; }
   .blatt {
     position: fixed; z-index: 51; left: 0; right: 0; bottom: 0;
@@ -307,9 +357,9 @@
   .blatt-kopf h2 { flex: 1; font-size: 25px; line-height: 1.25; letter-spacing: -0.015em; margin: 2px 0 0; font-variation-settings: "wdth" 90; }
   .naehrwerte { background: var(--honig-hell); border-radius: 18px; padding: 15px 18px; margin: 18px 0 8px; }
   .naehrwerte dl { margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px 14px; font-variant-numeric: tabular-nums; }
-  .naehrwerte dt { font-size: 12.5px; line-height: 1.5; color: #7A520F; font-weight: 600; }
+  .naehrwerte dt { font-size: 12.5px; line-height: 1.5; color: var(--honig-text); font-weight: 600; }
   .naehrwerte dd { margin: 0; font-weight: 700; font-size: 19px; line-height: 1.3; grid-row: 2; letter-spacing: -0.01em; }
-  .naehrwerte-kopf { font-size: 12.5px; font-weight: 600; color: #7A520F; margin: 0 0 8px; }
+  .naehrwerte-kopf { font-size: 12.5px; font-weight: 600; color: var(--honig-text); margin: 0 0 8px; }
   .naehrwerte-fuss { font-size: 13.5px; line-height: 1.55; color: var(--tinte-2); margin: 0 0 18px 4px; }
   .blatt-bild { margin: 0 -18px 4px; border-radius: 14px 14px 0 0; aspect-ratio: 16 / 9; position: relative; overflow: hidden; background: var(--creme); }
   .blatt-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -326,7 +376,7 @@
   .schritte { margin: 0; padding-left: 24px; }
   .schritte li { padding: 6px 0 10px 6px; max-width: 62ch; line-height: 1.65; }
   .schritte li::marker { color: var(--terrakotta); font-weight: 700; }
-  .zeit-hinweis { color: #8a7d6e; white-space: nowrap; }
+  .zeit-hinweis { color: var(--zeit); white-space: nowrap; }
   .notiz { margin: 0; padding: 12px 14px; background: var(--salbei-hell); border-radius: 14px; color: var(--salbei-dunkel); max-width: 62ch; }
   .blatt-aktionen { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; position: sticky; bottom: calc(-24px - env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--papier) 70%, transparent); padding: 14px 0 4px; }
   .blatt-aktionen .knopf { flex: 1 1 auto; padding: 14px 18px; font-size: 16px; border-radius: 14px; }
@@ -342,19 +392,19 @@
   .imp-knopf .imp-ico svg { width: 24px; height: 24px; }
   .imp-knopf b { display: block; font-size: 15px; font-weight: 700; }
   .imp-knopf small { display: block; font-size: 13px; font-weight: 400; color: var(--tinte-2); margin-top: 2px; }
-  .import { position: fixed; inset: 0; z-index: 120; background: rgba(45,42,34,.45); display: none; align-items: flex-end; justify-content: center; }
+  .import { position: fixed; inset: 0; z-index: 120; background: var(--dimmer); display: none; align-items: flex-end; justify-content: center; }
   .import.zeigen { display: flex; }
   .imp-karte { width: min(560px, 100%); max-height: 92vh; overflow: auto; background: var(--creme); border-radius: 26px 26px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); }
   @media (min-width: 700px) { .import { align-items: center; } .imp-karte { border-radius: 26px; } }
   .imp-karte h2 { margin: 0 0 4px; font-size: 20px; }
-  .imp-karte textarea { width: 100%; min-height: 110px; box-sizing: border-box; font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 16px; border: 1.5px solid var(--rahmen); background: #fff; resize: vertical; }
+  .imp-karte textarea { width: 100%; min-height: 110px; box-sizing: border-box; font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 16px; border: 1.5px solid var(--rahmen); background: var(--feld); resize: vertical; }
   .imp-zeile { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
   .imp-bild { max-height: 90px; border-radius: 12px; border: 1.5px solid var(--rahmen); }
   .imp-liste { margin: 12px 0 0; padding: 0; list-style: none; }
   .imp-liste li { display: flex; gap: 10px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--linie); }
   .imp-liste input { width: 20px; height: 20px; accent-color: var(--terrakotta); flex: none; }
   .imp-liste label { flex: 1; }
-  .imp-fehler { color: #a63a1d; font-size: 14px; margin: 8px 0 0; min-height: 1.2em; }
+  .imp-fehler { color: var(--fehler); font-size: 14px; margin: 8px 0 0; min-height: 1.2em; }
   .verw-zeile { display: flex; gap: 10px; align-items: center; padding: 10px 4px; border-top: 1px solid var(--linie); }
   .verw-zeile > div { flex: 1; min-width: 0; }
   .verw-zeile small { display: block; color: var(--tinte-3); font-size: 12px; }
@@ -412,7 +462,7 @@
   .koch-zutaten li.basic span:first-child { color: var(--tinte-2); }
   .dafuer { font-size: 13px; font-weight: 650; color: var(--tinte-2); margin: 24px 0 8px; }
   .timer-kasten { margin: 22px 0 0; background: var(--honig-hell); border-radius: 18px; padding: 16px 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .timer-zahl { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: #7A520F; font-variation-settings: "wdth" 80; }
+  .timer-zahl { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--honig-text); font-variation-settings: "wdth" 80; }
   .timer-kasten.aus { background: var(--salbei-hell); }
   .timer-kasten.aus .timer-zahl { color: var(--salbei-dunkel); }
   .timer-kasten .knopf { margin-left: auto; }
@@ -425,39 +475,46 @@
   /* ---------- Toast ---------- */
 
   /* ---- Konto / Sync ---- */
-  .konto-wrap { position: relative; margin-left: auto; }
+  .kopf-rechts { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .konto-wrap { position: relative; }
+  .thema-knopf { width: 38px; height: 38px; border-radius: 999px; border: 1.5px solid var(--rahmen); background: var(--papier); color: var(--tinte-2); display: grid; place-items: center; cursor: pointer; padding: 0; }
+  .thema-knopf svg { width: 19px; height: 19px; grid-area: 1 / 1; }
+  .thema-knopf .mond { display: none; }
+  :root[data-theme="dark"] .thema-knopf .sonne { display: none; }
+  :root[data-theme="dark"] .thema-knopf .mond { display: block; }
   .konto-knopf { display:flex; align-items:center; gap:8px; background:var(--papier); border:1.5px solid var(--rahmen); border-radius:999px; padding:7px 13px; font:inherit; font-size:.82rem; font-weight:600; color:var(--text, #3a2e25); cursor:pointer; }
   .konto-punkt { width:9px; height:9px; border-radius:50%; background:var(--salbei); }
   .konto-punkt.arbeit { background:var(--honig); }
-  .konto-punkt.aus { background:#B9AFA0; }
+  .konto-punkt.aus { background:var(--aus); }
   .konto-menue { position:absolute; right:0; top:calc(100% + 8px); min-width:210px; background:var(--papier); border:1.5px solid var(--rahmen); border-radius:18px; padding:14px; box-shadow:0 10px 30px rgba(80,50,20,.14); z-index:60; display:none; }
   .konto-menue.offen { display:block; }
   .konto-menue p { margin:0 0 10px; font-size:.85rem; line-height:1.4; }
   .konto-menue button { width:100%; font:inherit; font-weight:600; font-size:.85rem; padding:9px; border-radius:12px; border:1.5px solid var(--rahmen); background:var(--creme); cursor:pointer; }
   .anmeldung { position:fixed; inset:0; z-index:200; background:var(--creme); display:none; align-items:center; justify-content:center; padding:20px; overflow:auto; }
   .anmeldung.zeigen { display:flex; }
+  .an-thema { position:absolute; top:14px; right:14px; }
   .an-karte { width:100%; max-width:380px; background:var(--papier); border:1.5px solid var(--rahmen); border-radius:28px; padding:28px 24px 24px; }
   .an-karte h1 { margin:0 0 4px; font-size:1.7rem; }
-  .an-karte .klein { margin:0 0 18px; color:#7a6c5e; font-size:.88rem; line-height:1.45; }
+  .an-karte .klein { margin:0 0 18px; color:var(--gedaempft); font-size:.88rem; line-height:1.45; }
   .an-reiter { display:flex; gap:6px; background:var(--creme); border-radius:999px; padding:4px; margin-bottom:16px; }
-  .an-reiter button { flex:1; font:inherit; font-weight:600; font-size:.88rem; border:0; background:none; padding:9px; border-radius:999px; cursor:pointer; color:#7a6c5e; }
+  .an-reiter button { flex:1; font:inherit; font-weight:600; font-size:.88rem; border:0; background:none; padding:9px; border-radius:999px; cursor:pointer; color:var(--gedaempft); }
   .an-reiter button.aktiv { background:var(--terrakotta); color:#fff; }
   .an-karte label { display:block; font-size:.8rem; font-weight:600; margin:0 0 5px; }
-  .an-karte input { width:100%; font:inherit; font-size:1rem; padding:11px 13px; margin-bottom:14px; border-radius:14px; border:1.5px solid var(--rahmen); background:#fff; box-sizing:border-box; }
+  .an-karte input { width:100%; font:inherit; font-size:1rem; padding:11px 13px; margin-bottom:14px; border-radius:14px; border:1.5px solid var(--rahmen); background:var(--feld); box-sizing:border-box; }
   .an-pwfeld { position:relative; }
   .an-pwfeld input { padding-right:46px; }
-  .an-auge { position:absolute; right:6px; top:5px; width:36px; height:36px; border:0; background:none; border-radius:10px; cursor:pointer; color:#7a6c5e; display:grid; place-items:center; }
+  .an-auge { position:absolute; right:6px; top:5px; width:36px; height:36px; border:0; background:none; border-radius:10px; cursor:pointer; color:var(--gedaempft); display:grid; place-items:center; }
   .an-auge:hover { background:var(--creme); }
   .an-auge svg { width:22px; height:22px; }
   .an-auge .zu { display:none; }
   .an-auge[aria-pressed="true"] .auf { display:none; }
   .an-auge[aria-pressed="true"] .zu { display:block; }
-  .an-gleich { font-size:.82rem; min-height:1.1em; margin:-8px 0 12px; color:#7a6c5e; }
+  .an-gleich { font-size:.82rem; min-height:1.1em; margin:-8px 0 12px; color:var(--gedaempft); }
   .an-gleich.ja { color:var(--salbei-dunkel); }
-  .an-gleich.nein { color:#a63a1d; }
+  .an-gleich.nein { color:var(--fehler); }
   .an-karte .los { width:100%; font:inherit; font-weight:700; font-size:1rem; padding:13px; border:0; border-radius:14px; background:var(--terrakotta); color:#fff; cursor:pointer; }
   .an-karte .los[disabled] { opacity:.6; }
-  .an-fehler { color:#a63a1d; font-size:.85rem; min-height:1.2em; margin:0 0 10px; }
+  .an-fehler { color:var(--fehler); font-size:.85rem; min-height:1.2em; margin:0 0 10px; }
   .toast {
     position: fixed; left: 50%; bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom)); z-index: 60;
     transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
@@ -483,6 +540,11 @@
       <a href="#merkliste" data-reiter="merkliste">Merkliste</a>
       <a href="#lebensmittel" data-reiter="lebensmittel">Lebensmittel</a>
     </nav>
+    <div class="kopf-rechts">
+    <button type="button" class="thema-knopf" id="thema" aria-label="Zum dunklen Design wechseln" title="Tag / Nacht">
+      <svg class="sonne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
     <div class="konto-wrap" id="konto" hidden>
       <button class="konto-knopf" id="konto-knopf" type="button" aria-haspopup="true"><span class="konto-punkt" id="konto-punkt"></span><span id="konto-name"></span></button>
       <div class="konto-menue" id="konto-menue">
@@ -491,10 +553,15 @@
         <button type="button" id="abmelden">Abmelden</button>
       </div>
     </div>
+    </div>
   </div>
 </header>
 
 <div class="anmeldung" id="anmeldung" role="dialog" aria-modal="true" aria-labelledby="an-titel">
+  <button type="button" class="thema-knopf an-thema" aria-label="Zum dunklen Design wechseln" title="Tag / Nacht">
+    <svg class="sonne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
   <form class="an-karte" id="an-form" autocomplete="on">
     <h1 id="an-titel">Prepd</h1>
     <p class="klein" id="an-text">Melde dich an, damit deine Einkaufsliste auf PC und Handy gleich bleibt.</p>
@@ -1769,6 +1836,29 @@
   $('#schleier').addEventListener('click', detailSchliessen);
   window.addEventListener('scroll', () => $('#kopf').classList.toggle('gescrollt', scrollY > 4), { passive: true });
   window.addEventListener('hashchange', navigieren);
+
+  /* ---------------- Tag / Nacht ---------------- */
+  (() => {
+    const wurzel = document.documentElement, knopfe = [...document.querySelectorAll('.thema-knopf')], meta = document.querySelector('meta[name="theme-color"]');
+    const anwenden = dunkel => {
+      wurzel.setAttribute('data-theme', dunkel ? 'dark' : 'light');
+      if (meta) meta.setAttribute('content', dunkel ? '#1B1713' : '#FAF5EA');
+      knopfe.forEach(k => k.setAttribute('aria-label', dunkel ? 'Zum hellen Design wechseln' : 'Zum dunklen Design wechseln'));
+    };
+    anwenden(wurzel.getAttribute('data-theme') === 'dark');
+    knopfe.forEach(k => k.addEventListener('click', () => {
+      const dunkel = wurzel.getAttribute('data-theme') !== 'dark';
+      anwenden(dunkel);
+      try { localStorage.setItem('prepd-thema', dunkel ? 'dunkel' : 'hell'); } catch (e) {}
+    }));
+    // Ohne eigene Wahl dem System folgen (z. B. abends automatisch dunkel)
+    try {
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        let eigene = null; try { eigene = localStorage.getItem('prepd-thema'); } catch (x) {}
+        if (!eigene) anwenden(e.matches);
+      });
+    } catch (e) {}
+  })();
 
   navigieren();
   alles();
