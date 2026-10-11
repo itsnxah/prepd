@@ -183,6 +183,10 @@
   }
   .suche svg { width: 18px; height: 18px; color: var(--tinte-3); flex: none; }
   .suche input { border: 0; background: none; outline: none; padding: 12px 0; width: 100%; font-size: 16px; }
+  .abteilungen { display: inline-flex; gap: 4px; padding: 4px; margin: 0 0 14px; background: var(--gruppe-bg); border: 1.5px solid var(--linie); border-radius: 999px; }
+  .abteilungen button { border: 0; background: none; font: inherit; font-weight: 700; font-size: 15px; color: var(--tinte-2); padding: 9px 18px; border-radius: 999px; cursor: pointer; }
+  .abteilungen button span { font-weight: 600; font-size: 12.5px; opacity: .75; margin-left: 3px; }
+  .abteilungen button[aria-pressed="true"] { background: var(--terrakotta); color: #fff; }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .chip {
     border: 1px solid var(--linie); background: var(--papier); color: var(--tinte-2);
@@ -658,6 +662,10 @@
   <section class="ansicht" id="ansicht-rezepte" aria-labelledby="t-rezepte">
     <h1 id="t-rezepte">Was kochst du?</h1>
     <p class="unterzeile">Tipp auf das Plus, dann landen die Zutaten auf deiner Einkaufsliste. Die Werte gelten pro Person.</p>
+    <div class="abteilungen" role="group" aria-label="Abteilung">
+      <button type="button" data-abt="gerichte" aria-pressed="true">Gerichte <span id="anz-gerichte"></span></button>
+      <button type="button" data-abt="sweets" aria-pressed="false">Sweets <span id="anz-sweets"></span></button>
+    </div>
     <div class="werkzeug">
       <label class="suche">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -1254,7 +1262,7 @@
   };
 
   /* ---------------- Rezepte ---------------- */
-  const filter = { prep: false, schnell: false, nogo: true, suche: '', sort: 'eiweiss' };
+  const filter = { abt: 'gerichte', prep: false, schnell: false, nogo: true, suche: '', sort: 'eiweiss' };
 
   const rezeptKachel = (r, ids) => {
     const nw = NW[r.id], drin = imKorb(r.id);
@@ -1293,7 +1301,12 @@
   const rezepteZeigen = () => {
     const ids = listenIds();
     const q = filter.suche.trim().toLowerCase();
+    const istSweet = r => r.kategorie === 'sweets';
+    const mitSweets = filter.abt === 'sweets';
+    $('#anz-gerichte').textContent = D.rezepte.filter(r => !istSweet(r)).length;
+    $('#anz-sweets').textContent = D.rezepte.filter(istSweet).length;
     let liste = D.rezepte.filter(r => {
+      if (istSweet(r) !== mitSweets) return false;
       if (filter.prep && !r.mealPrep) return false;
       if (filter.schnell && r.zeit > 20) return false;
       if (filter.nogo && nogosIm(r).length) return false;
@@ -1310,7 +1323,7 @@
     sichtbar = liste;
     // Noahs Auswahl: nur ohne Suche, und dann nicht doppelt im Rest der Liste
     const fav = (D.favoriten || []).map(id => REZ[id]).filter(Boolean).slice(0, 3);
-    const zeigeAuswahl = fav.length > 0 && !q;
+    const zeigeAuswahl = fav.length > 0 && !q && !mitSweets;
     $('#auswahl').hidden = !zeigeAuswahl;
     if (zeigeAuswahl) {
       $('#auswahl-liste').innerHTML = fav.map(r => rezeptKachel(r, ids)).join('');
@@ -1319,7 +1332,7 @@
     }
     $('#rezept-liste').innerHTML = liste.length
       ? liste.map(r => rezeptKachel(r, ids)).join('')
-      : zeigeAuswahl ? '' : `<div class="leer"><strong>Kein Gericht gefunden</strong>Probier einen anderen Suchbegriff oder schalte die Filter aus.</div>`;
+      : zeigeAuswahl ? '' : mitSweets && !D.rezepte.some(istSweet) ? `<div class="leer"><strong>Noch keine Sweets</strong>Hier landen bald Nachtisch und Snacks.</div>` : `<div class="leer"><strong>${mitSweets ? 'Kein Sweet' : 'Kein Gericht'} gefunden</strong>Probier einen anderen Suchbegriff oder schalte die Filter aus.</div>`;
   };
 
   /* ---------------- Rezept-Detail ---------------- */
@@ -1856,6 +1869,11 @@
     }
     if (d.hinzu) { gerichtSetzen(d.hinzu, detail ? detail.portionen : 1); return; }
     if (d.entfernen) { gerichtEntfernen(d.entfernen); if (detail) detailSchliessen(); return; }
+    if (d.abt) {
+      filter.abt = d.abt;
+      $$('[data-abt]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.abt === d.abt)));
+      return rezepteZeigen();
+    }
     if (d.filter) {
       filter[d.filter] = !filter[d.filter];
       t.setAttribute('aria-pressed', filter[d.filter]);
