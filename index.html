@@ -333,6 +333,22 @@
   .panel-kopf { display: flex; align-items: baseline; gap: 12px; }
   .panel-kopf h2 { flex: 1; margin: 0; }
   .panel-kopf .knopf-text { padding: 0; flex: none; }
+  .imp-knopf { margin: 10px 0 0; }
+  .import { position: fixed; inset: 0; z-index: 120; background: rgba(45,42,34,.45); display: none; align-items: flex-end; justify-content: center; }
+  .import.zeigen { display: flex; }
+  .imp-karte { width: min(560px, 100%); max-height: 92vh; overflow: auto; background: var(--creme); border-radius: 26px 26px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); }
+  @media (min-width: 700px) { .import { align-items: center; } .imp-karte { border-radius: 26px; } }
+  .imp-karte h2 { margin: 0 0 4px; font-size: 20px; }
+  .imp-karte textarea { width: 100%; min-height: 110px; box-sizing: border-box; font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 16px; border: 1.5px solid var(--rahmen); background: #fff; resize: vertical; }
+  .imp-zeile { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+  .imp-bild { max-height: 90px; border-radius: 12px; border: 1.5px solid var(--rahmen); }
+  .imp-liste { margin: 12px 0 0; padding: 0; list-style: none; }
+  .imp-liste li { display: flex; gap: 10px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--linie); }
+  .imp-liste input { width: 20px; height: 20px; accent-color: var(--terrakotta); flex: none; }
+  .imp-liste label { flex: 1; }
+  .imp-fehler { color: #a63a1d; font-size: 14px; margin: 8px 0 0; min-height: 1.2em; }
+  .imp-aktionen { display: flex; gap: 10px; margin-top: 14px; }
+  .imp-aktionen .knopf { flex: 1; }
   .merk-seite { max-width: 720px; }
   .merk-gruppe { margin-bottom: 14px; }
   .merk-gruppe h2 { margin: 0 0 10px; }
@@ -506,6 +522,7 @@
           <input id="eigener-text" placeholder="Etwas dazuschreiben" maxlength="80">
           <button class="knopf" type="submit">Hinzufügen</button>
         </form>
+        <button class="knopf-text imp-knopf" type="button" id="imp-oeffnen">Aus Text oder Bild einfügen</button>
         <div id="einkauf-liste"></div>
         <div class="listen-fuss" id="listen-fuss"></div>
       </div>
@@ -567,6 +584,26 @@
 <div class="schleier" id="schleier" hidden></div>
 <div class="blatt" id="blatt" role="dialog" aria-modal="true" aria-labelledby="blatt-titel" hidden></div>
 <section class="koch" id="koch" aria-label="Kochmodus" hidden></section>
+<div class="import" id="import" role="dialog" aria-modal="true" aria-labelledby="imp-titel">
+  <div class="imp-karte">
+    <h2 id="imp-titel">Aus Text oder Bild</h2>
+    <p class="klein">Füg eine Nachricht, ein Rezept oder einen Einkaufszettel ein, als Text oder als Bild. Die KI macht daraus Einkaufsposten, du bestätigst sie vorher.</p>
+    <textarea id="imp-text" placeholder="Text hier einfügen, zum Beispiel „Bring bitte Milch, 2 Brötchen und Spülmittel mit“"></textarea>
+    <div class="imp-zeile">
+      <label class="knopf zweit" for="imp-datei" style="cursor:pointer">Bild wählen</label>
+      <input type="file" id="imp-datei" accept="image/*" hidden>
+      <img class="imp-bild" id="imp-vorschau" alt="" hidden>
+      <button class="knopf-text" type="button" id="imp-bild-weg" hidden>Bild entfernen</button>
+    </div>
+    <p class="klein" style="margin:0">Tipp: Ein Bild aus der Zwischenablage kannst du direkt ins Textfeld einfügen.</p>
+    <p class="imp-fehler" id="imp-fehler" role="alert"></p>
+    <ul class="imp-liste" id="imp-liste"></ul>
+    <div class="imp-aktionen">
+      <button class="knopf zweit" type="button" id="imp-zu">Schließen</button>
+      <button class="knopf terra" type="button" id="imp-los">Erkennen</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="data.js"></script>
@@ -810,7 +847,15 @@
       // Beim Start: Ungesendetes (Z ≠ Basis) hochladen, sonst neuen Stand holen
       if (!gleich(Z, basis)) { schmutzig = true; senden(); } else holen();
     }
-    return { start };
+    async function ki(body) {
+      if (!sitz) return { fehler: 'sitzung' };
+      const r = await fetch(cfg.url.replace(/\/$/, '') + '/functions/v1/prepd-einkauf', {
+        method: 'POST', headers: { apikey: cfg.key, 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ token: sitz.token }, body)),
+      });
+      return r.json().catch(() => ({ fehler: 'antwort' }));
+    }
+    return { start, ki, angemeldet: () => !!sitz };
   })();
 
   /* ---------------- Merkliste (Posten außerhalb der Rezepte) ---------------- */
@@ -1498,6 +1543,75 @@
   });
   $('#rezept-suche').addEventListener('input', e => { filter.suche = e.target.value; rezepteZeigen(); });
   $('#lm-suche').addEventListener('input', e => { lmFilter.suche = e.target.value; lmZeigen(); });
+  /* ---------------- Aus Text oder Bild einkaufen ---------------- */
+  const Import = (() => {
+    let bild = null, erkannt = [];
+    const el = id => $('#' + id);
+    const fehler = t => { el('imp-fehler').textContent = t || ''; };
+    const zurueck = () => {
+      bild = null; erkannt = [];
+      el('imp-text').value = ''; el('imp-vorschau').hidden = true; el('imp-bild-weg').hidden = true; el('imp-datei').value = '';
+      el('imp-liste').innerHTML = ''; fehler(''); el('imp-los').textContent = 'Erkennen';
+    };
+    const oeffnen = () => {
+      zurueck();
+      el('import').classList.add('zeigen'); document.body.style.overflow = 'hidden';
+      if (!Wolke.angemeldet()) fehler('Dafür musst du angemeldet sein.');
+      else setTimeout(() => el('imp-text').focus(), 50);
+    };
+    const schliessen = () => { el('import').classList.remove('zeigen'); document.body.style.overflow = ''; };
+    const bildLaden = datei => new Promise((ok, nein) => {
+      const url = URL.createObjectURL(datei), img = new Image();
+      img.onload = () => {
+        const max = 1400, f = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas'); c.width = Math.round(img.width * f); c.height = Math.round(img.height * f);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+        const data = c.toDataURL('image/jpeg', 0.8); ok({ typ: 'image/jpeg', daten: data.split(',')[1], vorschau: data });
+      };
+      img.onerror = () => nein(new Error('bild')); img.src = url;
+    });
+    const bildSetzen = async datei => {
+      if (!datei || !datei.type.startsWith('image/')) return;
+      try {
+        bild = await bildLaden(datei);
+        el('imp-vorschau').src = bild.vorschau; el('imp-vorschau').hidden = false; el('imp-bild-weg').hidden = false; fehler('');
+      } catch (e) { fehler('Das Bild konnte nicht gelesen werden.'); }
+    };
+    const zeigeErgebnis = () => {
+      el('imp-liste').innerHTML = erkannt.map((t, i) => `<li><input type="checkbox" id="imp-p${i}" data-imp="${i}" checked><label for="imp-p${i}">${esc(t)}</label></li>`).join('');
+      el('imp-los').textContent = erkannt.length ? 'Auf die Liste' : 'Erkennen';
+    };
+    const los = async () => {
+      if (erkannt.length) {            // Schritt 2: übernehmen
+        const gewaehlt = erkannt.filter((_, i) => el('imp-p' + i)?.checked);
+        gewaehlt.forEach(text => { Z.eigene.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text }); merken(text); });
+        if (gewaehlt.length) { sichern(); toast(`${gewaehlt.length} Posten auf der Liste`); }
+        schliessen(); return;
+      }
+      const text = el('imp-text').value.trim();
+      if (!text && !bild) { fehler('Füg erst einen Text oder ein Bild ein.'); return; }
+      const knopf = el('imp-los'); knopf.disabled = true; knopf.textContent = 'Lese …'; fehler('');
+      try {
+        const a = await Wolke.ki({ text, bild: bild ? { typ: bild.typ, daten: bild.daten } : undefined });
+        if (a.ok) { erkannt = a.posten; if (!erkannt.length) fehler('Ich habe nichts zum Einkaufen gefunden.'); zeigeErgebnis(); }
+        else fehler(({ sitzung: 'Bitte neu anmelden.', konfiguration: 'Der KI-Zugang ist noch nicht eingerichtet.', leer: 'Füg erst einen Text oder ein Bild ein.', bild: 'Das Bild ist zu groß oder hat ein falsches Format.', ki: 'Die KI ist gerade nicht erreichbar.' })[a.fehler] || 'Das hat nicht geklappt.');
+      } catch (e) { fehler('Keine Verbindung. Bitte später nochmal.'); }
+      knopf.disabled = false; if (!erkannt.length) knopf.textContent = 'Erkennen';
+    };
+    el('imp-oeffnen').addEventListener('click', oeffnen);
+    el('imp-zu').addEventListener('click', schliessen);
+    el('import').addEventListener('click', e => { if (e.target.id === 'import') schliessen(); });
+    el('imp-los').addEventListener('click', los);
+    el('imp-datei').addEventListener('change', e => bildSetzen(e.target.files[0]));
+    el('imp-bild-weg').addEventListener('click', () => { bild = null; el('imp-vorschau').hidden = true; el('imp-bild-weg').hidden = true; el('imp-datei').value = ''; });
+    el('imp-text').addEventListener('input', () => { if (erkannt.length) { erkannt = []; el('imp-liste').innerHTML = ''; el('imp-los').textContent = 'Erkennen'; } });
+    el('imp-text').addEventListener('paste', e => {
+      const f = [...(e.clipboardData?.files || [])].find(x => x.type.startsWith('image/'));
+      if (f) { e.preventDefault(); bildSetzen(f); }
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && el('import').classList.contains('zeigen')) schliessen(); });
+  })();
+
   $('#eigener-posten').addEventListener('submit', e => {
     e.preventDefault();
     const feld = $('#eigener-text'), text = feld.value.trim(); if (!text) return;
