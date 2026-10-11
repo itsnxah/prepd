@@ -201,7 +201,7 @@
   .leer strong { display: block; color: var(--tinte); font-size: 18px; margin-bottom: 4px; }
 
   /* ---------- Einkaufsliste ---------- */
-  .einkauf { display: grid; gap: 20px; }
+  .einkauf { grid-template-columns: minmax(0, 1fr); display: grid; gap: 20px; }
   @media (min-width: 900px) { .einkauf { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } .seitenleiste { position: sticky; top: 96px; } }
   .eingabe {
     display: flex; gap: 8px; background: var(--papier); border: 1px solid var(--linie);
@@ -333,7 +333,13 @@
   .panel-kopf { display: flex; align-items: baseline; gap: 12px; }
   .panel-kopf h2 { flex: 1; margin: 0; }
   .panel-kopf .knopf-text { padding: 0; flex: none; }
-  .imp-knopf { margin: 10px 0 0; }
+  .imp-knopf { display: flex; align-items: center; gap: 14px; width: 100%; margin: 12px 0 4px; padding: 14px 16px; text-align: left; text-decoration: none; cursor: pointer; font: inherit; color: var(--tinte); background: var(--papier); border: 1.5px dashed var(--terrakotta); border-radius: 16px; transition: background .15s, transform .15s; }
+  .imp-knopf:hover { background: var(--terrakotta-hell); }
+  .imp-knopf:active { transform: scale(.99); }
+  .imp-knopf .imp-ico { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--terrakotta); color: #fff; }
+  .imp-knopf .imp-ico svg { width: 24px; height: 24px; }
+  .imp-knopf b { display: block; font-size: 15px; font-weight: 700; }
+  .imp-knopf small { display: block; font-size: 13px; font-weight: 400; color: var(--tinte-2); margin-top: 2px; }
   .import { position: fixed; inset: 0; z-index: 120; background: rgba(45,42,34,.45); display: none; align-items: flex-end; justify-content: center; }
   .import.zeigen { display: flex; }
   .imp-karte { width: min(560px, 100%); max-height: 92vh; overflow: auto; background: var(--creme); border-radius: 26px 26px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); }
@@ -522,7 +528,10 @@
           <input id="eigener-text" placeholder="Etwas dazuschreiben" maxlength="80">
           <button class="knopf" type="submit">Hinzufügen</button>
         </form>
-        <button class="knopf-text imp-knopf" type="button" id="imp-oeffnen">Aus Text oder Bild einfügen</button>
+        <button class="imp-knopf" type="button" id="imp-oeffnen">
+          <span class="imp-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
+          <span><b>Nachricht oder Foto einlesen</b><small>Text, Rezept oder Screenshot einfügen, die KI macht daraus die Liste</small></span>
+        </button>
         <div id="einkauf-liste"></div>
         <div class="listen-fuss" id="listen-fuss"></div>
       </div>
