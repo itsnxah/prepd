@@ -126,6 +126,10 @@
     font-variation-settings: "wdth" 85;
     display: flex; align-items: center; gap: 8px;
   }
+  .beta { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .08em; line-height: 1; padding: 3px 6px; border-radius: 6px; background: var(--honig-hell); color: var(--honig-text); border: 1px solid var(--honig); vertical-align: middle; text-transform: uppercase; }
+  .marke .beta { margin-left: 0; transform: translateY(-3px); font-family: system-ui, sans-serif; }
+  .imp-knopf .beta, .imp-karte h2 .beta { margin-left: 6px; }
+  .an-karte h1 .beta { margin-left: 8px; font-size: 11px; vertical-align: middle; }
   .marke-punkt { width: 10px; height: 10px; border-radius: 50%; background: var(--terrakotta); transform: translateY(6px); }
   .reiter-oben { display: none; margin-left: auto; gap: 4px; background: var(--papier); border: 1px solid var(--linie); border-radius: 999px; padding: 4px; }
   .reiter-oben a {
@@ -575,7 +579,7 @@
 
 <header class="kopf" id="kopf">
   <div class="kopf-innen">
-    <div class="marke" aria-label="Prepd">Prepd<span class="marke-punkt" aria-hidden="true"></span></div>
+    <div class="marke" aria-label="Prepd">Prepd<span class="marke-punkt" aria-hidden="true"></span><span class="beta" title="Prepd ist in der Beta-Phase: Es kann noch Fehler geben.">Beta</span></div>
     <nav class="reiter-oben" aria-label="Bereiche">
       <a href="#rezepte" data-reiter="rezepte">Rezepte</a>
       <a href="#einkauf" data-reiter="einkauf">Einkaufsliste <span class="zaehler" data-zaehler></span></a>
@@ -614,7 +618,7 @@
       <svg class="mond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
   </button>
   <form class="an-karte" id="an-form" autocomplete="on">
-    <h1 id="an-titel">Prepd</h1>
+    <h1 id="an-titel">Prepd <span class="beta" title="Beta-Phase">Beta</span></h1>
     <p class="klein" id="an-text">Melde dich an, damit deine Einkaufsliste auf PC und Handy gleich bleibt.</p>
     <div class="an-reiter" role="tablist">
       <button type="button" class="aktiv" data-modus="an">Anmelden</button>
@@ -695,7 +699,7 @@
         </form>
         <button class="imp-knopf" type="button" id="imp-oeffnen">
           <span class="imp-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
-          <span><b>Nachricht oder Foto einlesen</b><small>Text, Rezept oder Screenshot einfügen, die KI macht daraus die Liste</small></span>
+          <span><b>Nachricht oder Foto einlesen <span class="beta">Beta</span></b><small>Text, Rezept oder Screenshot einfügen, die KI macht daraus die Liste</small></span>
         </button>
         <div id="einkauf-liste"></div>
         <div class="listen-fuss" id="listen-fuss"></div>
@@ -769,8 +773,8 @@
 </div>
 <div class="import" id="import" role="dialog" aria-modal="true" aria-labelledby="imp-titel">
   <div class="imp-karte">
-    <h2 id="imp-titel">Aus Text oder Bild</h2>
-    <p class="klein">Füg eine Nachricht, ein Rezept oder einen Einkaufszettel ein, als Text oder als Bild. Die KI macht daraus Einkaufsposten, du bestätigst sie vorher.</p>
+    <h2 id="imp-titel">Aus Text oder Bild <span class="beta">Beta</span></h2>
+    <p class="klein">Die KI-Funktion ist noch in der Beta-Phase und kann sich irren, prüf die Posten deshalb vor dem Übernehmen. Füg eine Nachricht, ein Rezept oder einen Einkaufszettel ein, als Text oder als Bild. Die KI macht daraus Einkaufsposten, du bestätigst sie vorher.</p>
     <textarea id="imp-text" placeholder="Text hier einfügen, zum Beispiel „Bring bitte Milch, 2 Brötchen und Spülmittel mit“"></textarea>
     <div class="imp-zeile">
       <label class="knopf zweit" for="imp-datei" style="cursor:pointer">Bild wählen</label>
