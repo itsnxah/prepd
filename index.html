@@ -444,6 +444,17 @@
   .an-reiter button.aktiv { background:var(--terrakotta); color:#fff; }
   .an-karte label { display:block; font-size:.8rem; font-weight:600; margin:0 0 5px; }
   .an-karte input { width:100%; font:inherit; font-size:1rem; padding:11px 13px; margin-bottom:14px; border-radius:14px; border:1.5px solid var(--rahmen); background:#fff; box-sizing:border-box; }
+  .an-pwfeld { position:relative; }
+  .an-pwfeld input { padding-right:46px; }
+  .an-auge { position:absolute; right:6px; top:5px; width:36px; height:36px; border:0; background:none; border-radius:10px; cursor:pointer; color:#7a6c5e; display:grid; place-items:center; }
+  .an-auge:hover { background:var(--creme); }
+  .an-auge svg { width:22px; height:22px; }
+  .an-auge .zu { display:none; }
+  .an-auge[aria-pressed="true"] .auf { display:none; }
+  .an-auge[aria-pressed="true"] .zu { display:block; }
+  .an-gleich { font-size:.82rem; min-height:1.1em; margin:-8px 0 12px; color:#7a6c5e; }
+  .an-gleich.ja { color:var(--salbei-dunkel); }
+  .an-gleich.nein { color:#a63a1d; }
   .an-karte .los { width:100%; font:inherit; font-weight:700; font-size:1rem; padding:13px; border:0; border-radius:14px; background:var(--terrakotta); color:#fff; cursor:pointer; }
   .an-karte .los[disabled] { opacity:.6; }
   .an-fehler { color:#a63a1d; font-size:.85rem; min-height:1.2em; margin:0 0 10px; }
@@ -494,7 +505,24 @@
     <label for="an-name">Benutzername</label>
     <input id="an-name" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
     <label for="an-pw">Passwort</label>
-    <input id="an-pw" name="password" type="password" autocomplete="current-password" required>
+    <div class="an-pwfeld">
+      <input id="an-pw" name="password" type="password" autocomplete="current-password" required>
+      <button type="button" class="an-auge" data-auge="an-pw" aria-pressed="false" aria-label="Passwort anzeigen">
+        <svg class="auf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg class="zu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 17.9A10.7 10.7 0 0 1 12 19c-6.4 0-10-7-10-7a18 18 0 0 1 4.1-5M9.9 5.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.2 3.2M1 1l22 22"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+      </button>
+    </div>
+    <div id="an-pw2-box" hidden>
+      <label for="an-pw2">Passwort wiederholen</label>
+      <div class="an-pwfeld">
+        <input id="an-pw2" name="password2" type="password" autocomplete="new-password">
+        <button type="button" class="an-auge" data-auge="an-pw2" aria-pressed="false" aria-label="Passwort anzeigen">
+          <svg class="auf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="zu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 17.9A10.7 10.7 0 0 1 12 19c-6.4 0-10-7-10-7a18 18 0 0 1 4.1-5M9.9 5.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.2 3.2M1 1l22 22"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+        </button>
+      </div>
+      <p class="an-gleich" id="an-gleich" aria-live="polite"></p>
+    </div>
     <p class="an-fehler" id="an-fehler" role="alert"></p>
     <button class="los" id="an-los" type="submit">Anmelden</button>
   </form>
@@ -772,6 +800,17 @@
         ? 'Melde dich an, damit deine Einkaufsliste auf PC und Handy gleich bleibt.'
         : 'Name und Passwort reichen, keine E-Mail nötig. Deine Liste von diesem Gerät nehme ich mit. Das Passwort lässt sich nicht zurücksetzen – merk es dir.';
       $('#an-fehler').textContent = '';
+      $('#an-pw2-box').hidden = m === 'an';
+      $('#an-pw2').required = m !== 'an'; $('#an-pw2').value = ''; $('#an-gleich').textContent = '';
+      document.querySelectorAll('.an-auge').forEach(b => { b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', 'Passwort anzeigen'); $('#' + b.dataset.auge).type = 'password'; });
+    }
+    function gleichPruefen() {
+      const g = $('#an-gleich'), a = $('#an-pw').value, b = $('#an-pw2').value;
+      if (modus === 'an' || !b) { g.textContent = ''; g.className = 'an-gleich'; return; }
+      const ok = a === b;
+      if (ok) $('#an-fehler').textContent = '';
+      g.textContent = ok ? 'Passwörter stimmen überein' : 'Passwörter sind noch nicht gleich';
+      g.className = 'an-gleich ' + (ok ? 'ja' : 'nein');
     }
 
     /* ---------- Sitzung ---------- */
@@ -796,6 +835,7 @@
     async function absenden(ev) {
       ev.preventDefault();
       const name = $('#an-name').value.trim().toLowerCase(), pw = $('#an-pw').value, f = $('#an-fehler'), knopf = $('#an-los');
+      if (modus !== 'an' && pw !== $('#an-pw2').value) { f.textContent = 'Die beiden Passwörter sind nicht gleich.'; $('#an-pw2').focus(); return; }
       f.textContent = ''; knopf.disabled = true;
       try {
         const a = modus === 'an'
@@ -865,6 +905,13 @@
       if (!aktiv) return;                       // ohne config.js: rein lokal
       $('#an-form').addEventListener('submit', absenden);
       verwaltungStart();
+      document.querySelectorAll('.an-auge').forEach(b => b.addEventListener('click', () => {
+        const feld = $('#' + b.dataset.auge), zeigen = feld.type === 'password';
+        feld.type = zeigen ? 'text' : 'password';
+        b.setAttribute('aria-pressed', String(zeigen)); b.setAttribute('aria-label', zeigen ? 'Passwort verbergen' : 'Passwort anzeigen');
+        feld.focus();
+      }));
+      $('#an-pw').addEventListener('input', gleichPruefen); $('#an-pw2').addEventListener('input', gleichPruefen);
       document.querySelectorAll('.an-reiter button').forEach(b => b.addEventListener('click', () => setzeModus(b.dataset.modus)));
       $('#konto-knopf').addEventListener('click', e => { e.stopPropagation(); $('#konto-menue').classList.toggle('offen'); });
       document.addEventListener('click', e => { if (!e.target.closest('#konto')) $('#konto-menue').classList.remove('offen'); });
