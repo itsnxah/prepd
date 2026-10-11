@@ -42,6 +42,7 @@ window.PREPD = {
     { id: 'haehnchen',  name: 'Hähnchenbrust',        gang: 'Fleisch & Fisch', einheit: 'g', g: 1, n: { kcal: 110, e: 23.5, kh: 0,   f: 1.5 }, kw: 'Hähnchen' },
     { id: 'pute',       name: 'Putenbrust',           gang: 'Fleisch & Fisch', einheit: 'g', g: 1, n: { kcal: 105, e: 24,   kh: 0,   f: 1 }, kw: 'Pute' },
     { id: 'rinderhack', name: 'Rinderhack (5 % Fett)', gang: 'Fleisch & Fisch', einheit: 'g', g: 1, n: { kcal: 121, e: 21,   kh: 0,   f: 4.5 }, kw: 'Hack' },
+    { id: 'huefte',      name: 'Hüftsteak (mager)',    gang: 'Fleisch & Fisch', einheit: 'g', g: 1, n: { kcal: 120, e: 21.5, kh: 0,   f: 3.5 }, kw: 'Hüftsteak' },
     { id: 'lachs',      name: 'Lachsfilet',           gang: 'Fleisch & Fisch', einheit: 'g', g: 1, n: { kcal: 200, e: 20,   kh: 0,   f: 13 }, kw: 'Lachs' },
 
     // Kühlregal
@@ -58,6 +59,8 @@ window.PREPD = {
     { id: 'paprika',    name: 'Paprika',              gang: 'Obst & Gemüse', einheit: 'Stk', g: 160, n: { kcal: 31, e: 1,   kh: 6,   f: 0.3 }, kw: 'Paprika' },
     { id: 'zwiebel',    name: 'Zwiebel',              gang: 'Obst & Gemüse', einheit: 'Stk', g: 80,  n: { kcal: 40, e: 1.1, kh: 9,   f: 0.1 }, kw: 'Zwiebel' },
     { id: 'knoblauch',  name: 'Knoblauch',            gang: 'Obst & Gemüse', einheit: 'Zehe', g: 4,  n: { kcal: 140, e: 6,  kh: 28,  f: 0.5 }, kw: 'Knoblauch' },
+    { id: 'petersilie', name: 'Petersilie',           gang: 'Obst & Gemüse', einheit: 'g',   g: 1,   n: { kcal: 36, e: 3,   kh: 6,   f: 0.8 }, kw: 'Petersilie' },
+    { id: 'limette',    name: 'Limette',              gang: 'Obst & Gemüse', einheit: 'Stk', g: 60,  n: { kcal: 30, e: 0.7, kh: 10,  f: 0.2 }, kw: 'Limette' },
     { id: 'kartoffeln', name: 'Kartoffeln',           gang: 'Obst & Gemüse', einheit: 'g',   g: 1,   n: { kcal: 72, e: 2,   kh: 15,  f: 0.1 }, kw: 'Kartoffeln' },
     { id: 'champignons', name: 'Champignons',         gang: 'Obst & Gemüse', einheit: 'g',   g: 1,   n: { kcal: 22, e: 3.1, kh: 0.6, f: 0.3 }, kw: 'Champignons' },
     { id: 'spinat',     name: 'Babyspinat',           gang: 'Obst & Gemüse', einheit: 'g',   g: 1,   n: { kcal: 23, e: 2.9, kh: 0.6, f: 0.4 }, kw: 'Spinat' },
@@ -77,6 +80,7 @@ window.PREPD = {
     { id: 'huehnerbruehe', name: 'Hühnerbrühe',      gang: 'Konserven & Vorrat', einheit: 'ml',   g: 1,   n: { kcal: 3,   e: 0.3, kh: 0.3, f: 0.1 }, kw: 'Brühe' },
     { id: 'tomatenmark', name: 'Tomatenmark',          gang: 'Konserven & Vorrat', einheit: 'EL',   g: 15,  n: { kcal: 82,  e: 4.3, kh: 13, f: 0.5 }, kw: 'Tomatenmark' },
     { id: 'gewuerzgurken', name: 'Gewürzgurken (Glas)', gang: 'Konserven & Vorrat', einheit: 'Stk', g: 30, n: { kcal: 20, e: 0.5, kh: 3, f: 0.1 }, kw: 'Gewürzgurken' },
+    { id: 'sriracha',   name: 'Sriracha',             gang: 'Konserven & Vorrat', einheit: 'EL',   g: 17,  n: { kcal: 93,  e: 1.9, kh: 19, f: 0.9 }, kw: 'Sriracha' },
     { id: 'sesam',      name: 'Sesam',                gang: 'Konserven & Vorrat', einheit: 'EL',   g: 8,   n: { kcal: 580, e: 18, kh: 10, f: 50 }, kw: 'Sesam' },
     { id: 'salatcreme', name: 'Salatcreme oder Mayo light', gang: 'Kühlregal',   einheit: 'EL',   g: 15,  n: { kcal: 300, e: 1,  kh: 10, f: 28 }, kw: 'Salatcreme' },
     { id: 'passata',    name: 'Passierte Tomaten',    gang: 'Konserven & Vorrat', einheit: 'g',    g: 1,   n: { kcal: 25,  e: 1.4, kh: 3.8, f: 0.2 }, kw: 'passierte Tomaten' },
@@ -98,6 +102,9 @@ window.PREPD = {
     { id: 'haehnchengewuerz', name: 'Hähnchengewürz', gang: 'Gewürze & Öl', einheit: 'TL', g: 3, n: { kcal: 230, e: 8, kh: 35, f: 5 }, kw: 'Hähnchengewürz', basic: true },
     { id: 'hackgewuerz', name: 'Hackfleischgewürz',    gang: 'Gewürze & Öl', einheit: 'TL', g: 3,   n: { kcal: 230, e: 8,  kh: 35, f: 5 },   basic: true },
     { id: 'italienische-kraeuter', name: 'Italienische Kräuter', gang: 'Gewürze & Öl', einheit: 'TL', g: 1.5, n: { kcal: 270, e: 12, kh: 40, f: 6 }, kw: 'italienischen Kräutern', basic: true },
+    { id: 'rosmarin',   name: 'Rosmarin',             gang: 'Gewürze & Öl', einheit: 'TL', g: 2,   n: { kcal: 130, e: 3,  kh: 20, f: 6 }, kw: 'Rosmarin', basic: true },
+    { id: 'oregano',    name: 'Oregano',              gang: 'Gewürze & Öl', einheit: 'TL', g: 1,   n: { kcal: 265, e: 9,  kh: 40, f: 4 }, kw: 'Oregano', basic: true },
+    { id: 'cayenne',    name: 'Cayennepfeffer',       gang: 'Gewürze & Öl', einheit: 'TL', g: 1.8, n: { kcal: 318, e: 12, kh: 57, f: 17 }, kw: 'Cayenne', basic: true },
     { id: 'kraeuter',   name: 'TK-Kräuter',           gang: 'Gewürze & Öl', einheit: 'EL', g: 5,   n: { kcal: 40,  e: 3,  kh: 4,  f: 1 },   basic: true },
   ],
 
@@ -240,6 +247,25 @@ window.PREPD = {
         { t: 'Anrichten', text: 'Mit dem Reis anrichten oder in Dosen aufteilen. Wer mag, gibt etwas Petersilie und Parmesan obendrauf.' },
       ],
       notiz: 'Nach einem TikTok-Rezept, das im Video für 4 Meal-Prep-Portionen gedacht ist (800 g Hähnchen). Hier auf 1 Portion gerechnet: für das Vorkochen einfach oben auf 4 Personen hochstellen. Reis von 50 auf 40 g pro Portion reduziert. Mengen von getrockneten Tomaten, Gewürzen und Öl geschätzt, rote Zwiebel nehmen. Reis zum Mitnehmen getrennt abfüllen.',
+    },
+    {
+      id: 'bulking-steak-bowl',
+      name: 'Bulking Steak Bowl mit knusprigen Kartoffeln',
+      portionen: 1, zeit: 35, mealPrep: true, haltbar: 3,
+      zutaten: [
+        ['huefte', 250], ['kartoffeln', 300], ['olivenoel', 0.5], ['rosmarin', 0.5], ['knoblauchpulver', 0.5],
+        ['oregano', 0.5], ['salz', 0.25], ['cayenne', 0.25], ['petersilie', 5], ['joghurt-griechisch', 50],
+        ['salatcreme', 0.5], ['sriracha', 0.5], ['limette', 0.25],
+      ],
+      schritte: [
+        { t: 'Kartoffeln vorbereiten', text: 'Backofen auf 180 °C Umluft vorheizen. Die Kartoffeln in Würfel schneiden, mit Olivenöl und fein gehacktem Rosmarin verrühren und auf einem Blech verteilen.' },
+        { t: 'Kartoffeln backen', timer: 1200, text: 'Das Blech in den Ofen schieben und die Kartoffeln etwa 20 Minuten backen, bis sie goldbraun und knusprig sind. Wenn sie noch nicht knusprig genug sind, ein paar Minuten länger.' },
+        { t: 'Steak würzen', text: 'Hüftsteak in Würfel schneiden und mit Knoblauchpulver, Oregano, Salz und etwas Cayennepfeffer würzen.' },
+        { t: 'Steak anbraten', timer: 270, text: 'Eine Pfanne mit etwas Olivenöl heiß werden lassen, die Steakwürfel einzeln hineinlegen und rundherum 4 bis 5 Minuten anbraten. Nicht zu früh wenden, dann bräunen sie schön.' },
+        { t: 'Dip rühren', text: 'Petersilie hacken. Griechischen Joghurt, Salatcreme (oder Mayo light), Sriracha und den Saft der Limette verrühren, die Petersilie unterrühren und mit Salz abschmecken.' },
+        { t: 'Anrichten', text: 'Kartoffeln und Steak in eine Schale oder Dose geben, den Dip dazu. Zum Mitnehmen den Dip getrennt abfüllen.' },
+      ],
+      notiz: 'Nach einem TikTok-Rezept (Bulking Steak Bowl, im Video 800 kcal und 85 g Eiweiß pro Portion). Auf 1 Portion gerechnet, fürs Vorkochen einfach hochstellen. Das Rind ist auf 500 g pro Rezept angepasst (Video: 700 g), dazu sind Kartoffeln, Öl und Mayo etwas gekürzt, damit es nicht zu schwer wird. Mengen für Gewürze und Dip geschätzt.',
     },
   ],
 };
