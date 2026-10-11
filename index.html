@@ -472,7 +472,7 @@
   <!-- REZEPTE -->
   <section class="ansicht" id="ansicht-rezepte" aria-labelledby="t-rezepte">
     <h1 id="t-rezepte">Was kochst du?</h1>
-    <p class="unterzeile">Tipp auf das Plus, dann landen die Zutaten auf deiner Einkaufsliste. Die Werte gelten pro Portion.</p>
+    <p class="unterzeile">Tipp auf das Plus, dann landen die Zutaten auf deiner Einkaufsliste. Die Werte gelten pro Person.</p>
     <div class="werkzeug">
       <label class="suche">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -844,6 +844,7 @@
   };
 
   /* ---------------- Rechnen ---------------- */
+  const portText = n => n === 1 ? '1 Portion' : n + ' Portionen';
   const naehrwerte = (rezept, portionen = rezept.portionen) => {
     const faktor = portionen / rezept.portionen;
     const s = { kcal: 0, e: 0, kh: 0, f: 0 };
@@ -871,7 +872,7 @@
       const r = menge >= 100 ? Math.round(menge / 10) * 10 : Math.round(menge / 5) * 5 || Math.round(menge);
       return r + ' ' + einheit;
     }
-    return halbe(menge) + ' ' + (Math.abs(menge - 1) < 1e-9 ? einheit : MEHRZAHL[einheit] || einheit);
+    return halbe(menge) + ' ' + (menge <= 1 + 1e-9 ? einheit : MEHRZAHL[einheit] || einheit);
   };
   const schritt = (einheit, menge) => {
     if (einheit === 'g' || einheit === 'ml') return menge >= 300 ? 50 : 25;
@@ -949,7 +950,7 @@
         <button class="kachel-oeffnen" data-oeffnen="${r.id}" aria-label="${esc(r.name)} öffnen"></button>
         <div class="kachel-bild">
           ${bildHTML(r)}
-          ${drin ? `<span class="bild-fahne">${ICON.haken}${drin.portionen} Portionen</span>` : ''}
+          ${drin ? `<span class="bild-fahne">${ICON.haken}${portText(drin.portionen)}</span>` : ''}
           <button class="plus${drin ? ' drin' : ''}" data-schnell="${r.id}" aria-label="${drin ? esc(r.name) + ' von der Liste nehmen' : esc(r.name) + ' auf die Einkaufsliste'}">
             ${drin ? ICON.haken : ICON.plus}
           </button>
@@ -1014,7 +1015,7 @@
         ${r.mealPrep ? `<span class="marke-klein prep">${ICON.box}Meal Prep</span>` : ''}
       </div>
       <div class="naehrwerte">
-        <p class="naehrwerte-kopf">Pro Portion</p>
+        <p class="naehrwerte-kopf">Pro Person</p>
         <dl>
           <dt>kcal</dt><dd>${Math.round(nw.pro.kcal)}</dd>
           <dt>Eiweiß</dt><dd>${Math.round(nw.pro.e)} g</dd>
@@ -1022,10 +1023,10 @@
           <dt>Fett</dt><dd>${Math.round(nw.pro.f)} g</dd>
         </dl>
       </div>
-      <p class="naehrwerte-fuss">Ganzes Gericht mit ${p} Portionen: ${zahl(Math.round(nw.gesamt.kcal))} kcal und ${Math.round(nw.gesamt.e)} g Eiweiß</p>
+      ${p > 1 ? `<p class="naehrwerte-fuss">Zusammen für ${p} Personen: ${zahl(Math.round(nw.gesamt.kcal))} kcal und ${Math.round(nw.gesamt.e)} g Eiweiß</p>` : ''}
       <div class="portionen">
         <div class="text">
-          <strong>Portionen</strong>
+          <strong>Personen</strong>
           <span>${r.mealPrep ? 'Für Meal Prep hochstellen, jede Portion ist eine Dose.' : 'Die Mengen passen sich automatisch an.'}</span>
         </div>
         <div class="stepper">
@@ -1034,7 +1035,7 @@
           <button data-port="1" aria-label="Eine Portion mehr">+</button>
         </div>
       </div>
-      <h3>Zutaten</h3>
+      <h3>Zutaten für ${p} ${p === 1 ? 'Person' : 'Personen'}</h3>
       <ul class="zutaten">
         ${r.zutaten.map(([id, m]) => { const l = LM[id]; if (!l) return ''; return `<li class="${l.basic ? 'basic' : ''}"><span>${esc(l.name)}</span><span>${mengeText(m * f, l.einheit)}</span></li>`; }).join('')}
       </ul>
@@ -1045,14 +1046,14 @@
         <button class="knopf zweit" data-kochen="${r.id}" style="flex:1 1 100%">Kochen starten</button>
         ${drin
           ? `<button class="knopf zweit" data-entfernen="${r.id}">Von der Liste nehmen</button>
-             <button class="knopf salbei" data-hinzu="${r.id}" ${geaendert ? '' : 'disabled'}>${geaendert ? `Auf ${p} Portionen ändern` : 'Steht auf der Liste'}</button>`
+             <button class="knopf salbei" data-hinzu="${r.id}" ${geaendert ? '' : 'disabled'}>${geaendert ? `Auf ${portText(p)} ändern` : 'Steht auf der Liste'}</button>`
           : `<button class="knopf terra" data-hinzu="${r.id}">Auf die Einkaufsliste</button>`}
       </div>`;
   };
   let letzterFokus = null;
   const detailOeffnen = rid => {
     const da = imKorb(rid);
-    detail = { rid, portionen: da ? da.portionen : REZ[rid].portionen };
+    detail = { rid, portionen: da ? da.portionen : 1 };
     letzterFokus = document.activeElement;
     detailZeigen();
     const b = $('#blatt'), s = $('#schleier');
@@ -1160,7 +1161,7 @@
         ${Z.gerichte.length ? '<p class="klein">Rausnehmen zieht nur die Mengen dieses Gerichts ab.</p>' + Z.gerichte.map(g => {
           const r = REZ[g.rid]; if (!r) return '';
           return `<div class="gericht-zeile">
-            <button class="name" data-oeffnen="${r.id}" style="border:0;background:none;padding:0;text-align:left;cursor:pointer">${esc(r.name)}<small>${g.portionen} Portionen${r.mealPrep ? ', Meal Prep' : ''}</small></button>
+            <button class="name" data-oeffnen="${r.id}" style="border:0;background:none;padding:0;text-align:left;cursor:pointer">${esc(r.name)}<small>${portText(g.portionen)}${r.mealPrep ? ', Meal Prep' : ''}</small></button>
             <button class="x" data-entfernen="${r.id}" aria-label="${esc(r.name)} von der Liste nehmen">${ICON.x}</button>
           </div>`; }).join('') : '<p class="klein" style="margin:0">Noch keine. Im Rezeptbuch aufs Plus tippen.</p>'}
       </div>
@@ -1314,7 +1315,7 @@
       <div class="koch-kopf">
         <div class="wo">
           <strong>${esc(r.name)}</strong>
-          <span>${i === 0 ? 'Vorbereitung' : i > n ? 'Fertig' : `Schritt ${i} von ${n}`} · ${koch.portionen} Portionen</span>
+          <span>${i === 0 ? 'Vorbereitung' : i > n ? 'Fertig' : `Schritt ${i} von ${n}`} · ${portText(koch.portionen)}</span>
         </div>
         <button class="x" data-koch-aus aria-label="Kochmodus beenden">${ICON.x}</button>
       </div>
@@ -1324,7 +1325,7 @@
     if (i === 0) {
       inhalt = `
         <h2 class="koch-titel">Alles bereitstellen</h2>
-        <p class="koch-text">Das brauchst du für ${koch.portionen} Portionen. Die Mengen sind schon hochgerechnet.</p>
+        <p class="koch-text">Das brauchst du für ${portText(koch.portionen)}. Die Mengen sind schon hochgerechnet.</p>
         ${zutatenListe(r.zutaten.map(([id, m]) => ({ l: LM[id], menge: m * f })).filter(z => z.l))}`;
       fuss = `<button class="knopf terra" data-koch-weiter>Los geht's</button>`;
     } else if (i > n) {
@@ -1333,7 +1334,7 @@
           <div class="gross" aria-hidden="true">🍽️</div>
           <h2 class="koch-titel" style="margin-top:14px">Fertig</h2>
           <p class="koch-text" style="margin:0 auto">${r.mealPrep
-            ? `Hält ${r.haltbar} ${r.haltbar === 1 ? 'Tag' : 'Tage'} im Kühlschrank. ${koch.portionen} Portionen, also ${koch.portionen} Dosen.`
+            ? `Hält ${r.haltbar} ${r.haltbar === 1 ? 'Tag' : 'Tage'} im Kühlschrank. ${portText(koch.portionen)}, also ${koch.portionen === 1 ? '1 Dose' : koch.portionen + ' Dosen'}.`
             : 'Am besten gleich essen.'}</p>
         </div>`;
       fuss = `<button class="knopf zweit" data-koch-zurueck>Zurück</button><button class="knopf salbei" data-koch-aus>Schließen</button>`;
@@ -1414,7 +1415,7 @@
 
     if (d.leeren === undefined && leerenBestaetigen) { leerenBestaetigen = false; }
 
-    if (d.kochen) { const p = detail ? detail.portionen : REZ[d.kochen].portionen; detailSchliessen(); return kochOeffnen(d.kochen, p); }
+    if (d.kochen) { const p = detail ? detail.portionen : 1; detailSchliessen(); return kochOeffnen(d.kochen, p); }
     if (t.hasAttribute('data-koch-aus')) return kochSchliessen();
     if (t.hasAttribute('data-koch-weiter')) return kochGehen(1);
     if (t.hasAttribute('data-koch-zurueck')) return kochGehen(-1);
@@ -1441,14 +1442,14 @@
     if (d.oeffnen) return detailOeffnen(d.oeffnen);
     if (d.schnell) {
       if (imKorb(d.schnell)) return gerichtEntfernen(d.schnell);
-      return gerichtSetzen(d.schnell, REZ[d.schnell].portionen);
+      return gerichtSetzen(d.schnell, 1);
     }
     if (t.hasAttribute('data-schliessen')) return detailSchliessen();
     if (d.port && detail) {
       detail.portionen = Math.max(1, Math.min(20, detail.portionen + +d.port));
       return detailZeigen();
     }
-    if (d.hinzu) { gerichtSetzen(d.hinzu, detail ? detail.portionen : REZ[d.hinzu].portionen); return; }
+    if (d.hinzu) { gerichtSetzen(d.hinzu, detail ? detail.portionen : 1); return; }
     if (d.entfernen) { gerichtEntfernen(d.entfernen); if (detail) detailSchliessen(); return; }
     if (d.filter) {
       filter[d.filter] = !filter[d.filter];
