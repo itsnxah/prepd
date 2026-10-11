@@ -149,38 +149,6 @@ window.PREPD = {
       ],
     },
     {
-      id: 'chili-con-carne',
-      name: 'Chili con Carne',
-      portionen: 2, zeit: 35, mealPrep: true, haltbar: 4,
-      zutaten: [
-        ['rinderhack', 400], ['kidney', 1], ['mais', 1], ['passata', 500],
-        ['paprika', 1], ['zwiebel', 1], ['knoblauch', 2], ['kreuzkuemmel', 1],
-        ['paprikapulver', 2], ['salz', 1], ['pfeffer', 0.5],
-      ],
-      schritte: [
-        { t: 'Hack anbraten', timer: 480, text: 'Zwiebel und Knoblauch würfeln, Hack ohne Öl krümelig anbraten.' },
-        { t: 'Gemüse anrösten', timer: 180, text: 'Paprika würfeln und mit Zwiebel, Knoblauch und Gewürzen kurz mitrösten.' },
-        { t: 'Köcheln lassen', timer: 1200, text: 'Passierte Tomaten, abgetropfte Bohnen und Mais dazu, 20 Minuten köcheln lassen.' },
-        { t: 'Abschmecken', text: 'Abschmecken. Schmeckt am zweiten Tag noch besser.' },
-      ],
-    },
-    {
-      id: 'linsen-haehnchen-curry',
-      name: 'Rotes Linsen-Hähnchen-Curry',
-      portionen: 2, zeit: 30, mealPrep: true, haltbar: 3,
-      zutaten: [
-        ['haehnchen', 300], ['linsen', 100], ['kokosmilch', 200], ['passata', 250],
-        ['zwiebel', 1], ['knoblauch', 2], ['spinat', 100], ['curry', 2],
-        ['salz', 1],
-      ],
-      schritte: [
-        { t: 'Zwiebel anschwitzen', timer: 180, text: 'Zwiebel und Knoblauch anschwitzen, Currypulver kurz mitrösten.' },
-        { t: 'Hähnchen anbraten', timer: 300, text: 'Hähnchenwürfel dazu und rundum anbraten.' },
-        { t: 'Köcheln lassen', timer: 900, text: 'Linsen, Kokosmilch, passierte Tomaten und 200 ml Wasser dazu, 15 Minuten köcheln.' },
-        { t: 'Spinat unterheben', timer: 120, text: 'Spinat unterheben, bis er zusammenfällt. Salzen, fertig.' },
-      ],
-    },
-    {
       id: 'putengeschnetzeltes',
       bild: 'bilder/putengeschnetzeltes.jpg',
       name: 'Puten­geschnetzeltes mit Champignons und Kartoffeln',
@@ -195,67 +163,6 @@ window.PREPD = {
         { t: 'Pute anbraten', timer: 360, text: 'Pute in Streifen schneiden, in Öl anbraten, herausnehmen.' },
         { t: 'Champignons braten', timer: 300, text: 'Zwiebel und Champignons in der gleichen Pfanne braten.' },
         { t: 'Sauce binden', timer: 180, text: 'Frischkäse mit 100 ml Wasser einrühren, Pute zurück in die Pfanne, mit Kräutern abschmecken.' },
-      ],
-    },
-    {
-      id: 'hack-kartoffel-pfanne',
-      name: 'Hack-Kartoffel-Pfanne mit Quark-Dip',
-      portionen: 2, zeit: 30, mealPrep: true, haltbar: 3,
-      zutaten: [
-        ['rinderhack', 300], ['kartoffeln', 500], ['paprika', 1], ['zwiebel', 1],
-        ['magerquark', 250], ['kraeuter', 2], ['olivenoel', 1], ['paprikapulver', 1],
-        ['salz', 1],
-      ],
-      schritte: [
-        { t: 'Kartoffeln braten', timer: 900, text: 'Kartoffeln in kleine Würfel schneiden und in Öl 15 Minuten goldbraun braten.' },
-        { t: 'Hack und Gemüse dazu', timer: 420, text: 'Hack, Zwiebel und Paprika dazu und mitbraten, mit Paprikapulver und Salz würzen.' },
-        { t: 'Quark-Dip rühren', text: 'Quark mit Kräutern, Salz und einem Schluck Wasser glatt rühren.' },
-        { t: 'Anrichten', text: 'Für Meal Prep den Dip in einer extra Dose mitnehmen.' },
-      ],
-    },
-    {
-      id: 'lachs-ofenkartoffeln',
-      name: 'Lachs mit Ofenkartoffeln und Kräuterquark',
-      portionen: 2, zeit: 35, mealPrep: false, haltbar: 1,
-      zutaten: [
-        ['lachs', 250], ['kartoffeln', 400], ['tomaten', 200], ['magerquark', 200],
-        ['kraeuter', 2], ['olivenoel', 1], ['salz', 1], ['pfeffer', 0.5],
-      ],
-      schritte: [
-        { t: 'Kartoffeln in den Ofen', timer: 900, text: 'Ofen auf 200 °C vorheizen. Kartoffeln vierteln, mit Öl und Salz aufs Blech.' },
-        { t: 'Lachs dazulegen', timer: 900, text: 'Nach 15 Minuten Lachs und Tomaten dazulegen, weitere 15 Minuten backen.' },
-        { t: 'Kräuterquark rühren', text: 'Quark mit Kräutern, Salz und Pfeffer verrühren.' },
-        { t: 'Servieren', text: 'Frisch essen – Fisch wird aufgewärmt nicht besser.' },
-      ],
-    },
-    {
-      id: 'ruehrei-spinat',
-      name: 'Rührei mit Hüttenkäse und Spinat',
-      portionen: 2, zeit: 10, mealPrep: false, haltbar: 1,
-      zutaten: [
-        ['eier', 6], ['huettenkaese', 200], ['spinat', 100], ['tomaten', 150],
-        ['salz', 0.5], ['pfeffer', 0.5],
-      ],
-      schritte: [
-        { t: 'Eier verquirlen', text: 'Eier verquirlen, salzen und pfeffern.' },
-        { t: 'Spinat anbraten', timer: 120, text: 'Spinat in einer beschichteten Pfanne zusammenfallen lassen.' },
-        { t: 'Eier stocken lassen', timer: 180, text: 'Eier dazu und bei mittlerer Hitze stocken lassen, Hüttenkäse unterheben.' },
-        { t: 'Servieren', text: 'Mit halbierten Tomaten servieren.' },
-      ],
-    },
-    {
-      id: 'thunfisch-ei-salat',
-      name: 'Thunfisch-Ei-Salat',
-      portionen: 2, zeit: 15, mealPrep: true, haltbar: 2,
-      zutaten: [
-        ['thunfisch', 2], ['eier', 4], ['gurke', 1], ['tomaten', 200],
-        ['skyr', 150], ['zwiebel', 0.5], ['salz', 0.5], ['pfeffer', 0.5],
-      ],
-      schritte: [
-        { t: 'Eier hart kochen', timer: 540, text: 'Eier 9 Minuten hart kochen, abschrecken und würfeln.' },
-        { t: 'Gemüse schneiden', text: 'Gurke, Tomaten und Zwiebel klein schneiden.' },
-        { t: 'Dressing rühren', text: 'Thunfisch abtropfen lassen und mit Skyr, Salz und Pfeffer verrühren.' },
-        { t: 'Alles mischen', text: 'Alles mischen. Gurke erst kurz vor dem Essen dazugeben, dann bleibt sie knackig.' },
       ],
     },
   ],
