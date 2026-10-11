@@ -387,6 +387,30 @@
   .fertig-text .gross { font-size: 46px; line-height: 1; }
 
   /* ---------- Toast ---------- */
+
+  /* ---- Konto / Sync ---- */
+  .konto-wrap { position: relative; margin-left: auto; }
+  .konto-knopf { display:flex; align-items:center; gap:8px; background:var(--papier); border:1.5px solid var(--rahmen); border-radius:999px; padding:7px 13px; font:inherit; font-size:.82rem; font-weight:600; color:var(--text, #3a2e25); cursor:pointer; }
+  .konto-punkt { width:9px; height:9px; border-radius:50%; background:var(--salbei); }
+  .konto-punkt.arbeit { background:var(--honig); }
+  .konto-punkt.aus { background:#B9AFA0; }
+  .konto-menue { position:absolute; right:0; top:calc(100% + 8px); min-width:210px; background:var(--papier); border:1.5px solid var(--rahmen); border-radius:18px; padding:14px; box-shadow:0 10px 30px rgba(80,50,20,.14); z-index:60; display:none; }
+  .konto-menue.offen { display:block; }
+  .konto-menue p { margin:0 0 10px; font-size:.85rem; line-height:1.4; }
+  .konto-menue button { width:100%; font:inherit; font-weight:600; font-size:.85rem; padding:9px; border-radius:12px; border:1.5px solid var(--rahmen); background:var(--creme); cursor:pointer; }
+  .anmeldung { position:fixed; inset:0; z-index:200; background:var(--creme); display:none; align-items:center; justify-content:center; padding:20px; overflow:auto; }
+  .anmeldung.zeigen { display:flex; }
+  .an-karte { width:100%; max-width:380px; background:var(--papier); border:1.5px solid var(--rahmen); border-radius:28px; padding:28px 24px 24px; }
+  .an-karte h1 { margin:0 0 4px; font-size:1.7rem; }
+  .an-karte .klein { margin:0 0 18px; color:#7a6c5e; font-size:.88rem; line-height:1.45; }
+  .an-reiter { display:flex; gap:6px; background:var(--creme); border-radius:999px; padding:4px; margin-bottom:16px; }
+  .an-reiter button { flex:1; font:inherit; font-weight:600; font-size:.88rem; border:0; background:none; padding:9px; border-radius:999px; cursor:pointer; color:#7a6c5e; }
+  .an-reiter button.aktiv { background:var(--terrakotta); color:#fff; }
+  .an-karte label { display:block; font-size:.8rem; font-weight:600; margin:0 0 5px; }
+  .an-karte input { width:100%; font:inherit; font-size:1rem; padding:11px 13px; margin-bottom:14px; border-radius:14px; border:1.5px solid var(--rahmen); background:#fff; box-sizing:border-box; }
+  .an-karte .los { width:100%; font:inherit; font-weight:700; font-size:1rem; padding:13px; border:0; border-radius:14px; background:var(--terrakotta); color:#fff; cursor:pointer; }
+  .an-karte .los[disabled] { opacity:.6; }
+  .an-fehler { color:#a63a1d; font-size:.85rem; min-height:1.2em; margin:0 0 10px; }
   .toast {
     position: fixed; left: 50%; bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom)); z-index: 60;
     transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
@@ -411,8 +435,32 @@
       <a href="#einkauf" data-reiter="einkauf">Einkaufsliste <span class="zaehler" data-zaehler></span></a>
       <a href="#lebensmittel" data-reiter="lebensmittel">Lebensmittel</a>
     </nav>
+    <div class="konto-wrap" id="konto" hidden>
+      <button class="konto-knopf" id="konto-knopf" type="button" aria-haspopup="true"><span class="konto-punkt" id="konto-punkt"></span><span id="konto-name"></span></button>
+      <div class="konto-menue" id="konto-menue">
+        <p id="konto-status"></p>
+        <button type="button" id="abmelden">Abmelden</button>
+      </div>
+    </div>
   </div>
 </header>
+
+<div class="anmeldung" id="anmeldung" role="dialog" aria-modal="true" aria-labelledby="an-titel">
+  <form class="an-karte" id="an-form" autocomplete="on">
+    <h1 id="an-titel">Prepd</h1>
+    <p class="klein" id="an-text">Melde dich an, damit deine Einkaufsliste auf PC und Handy gleich bleibt.</p>
+    <div class="an-reiter" role="tablist">
+      <button type="button" class="aktiv" data-modus="an">Anmelden</button>
+      <button type="button" data-modus="neu">Konto erstellen</button>
+    </div>
+    <label for="an-name">Benutzername</label>
+    <input id="an-name" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="an-pw">Passwort</label>
+    <input id="an-pw" name="password" type="password" autocomplete="current-password" required>
+    <p class="an-fehler" id="an-fehler" role="alert"></p>
+    <button class="los" id="an-los" type="submit">Anmelden</button>
+  </form>
+</div>
 
 <main>
   <!-- REZEPTE -->
@@ -505,6 +553,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="data.js"></script>
+<script src="config.js"></script>
 <script>
 (() => {
   'use strict';
@@ -578,8 +627,193 @@
     blacklist: ['brokkoli', 'zucchini', 'kohl'], // mag ich nicht
   });
   let Z = Object.assign(leererZustand(), Speicher.laden() || {});
-  const sichern = () => { Speicher.speichern(Z); alles(); };
+  let Sync = null; // wird von der Wolke gesetzt, sobald angemeldet
+  const sichern = () => { Speicher.speichern(Z); alles(); if (Sync) Sync.geaendert(); };
   Speicher.beobachten(neu => { Z = Object.assign(leererZustand(), neu || {}); alles(); });
+
+  /* ======================================================================
+     Wolke – Konto (Benutzername + Passwort, ohne E-Mail) und Abgleich.
+     Ablauf: lokal speichern (Puffer), nach 0,9 s mit der Revisionsnummer
+     hochladen. Hat ein anderes Gerät dazwischen gespeichert, kommt der
+     Serverstand zurück und beide Änderungen werden zusammengeführt
+     (Drei-Wege-Abgleich), statt dass einer den anderen überschreibt.
+     Abgleich außerdem alle 20 s und sobald die Seite wieder sichtbar wird.
+     ====================================================================== */
+  const Wolke = (() => {
+    const cfg = window.PREPD_CONFIG || {};
+    const aktiv = !!(cfg.url && cfg.key);
+    const SK = 'prepd-sitzung-v1';
+    let sitz = null, rev = 0, basis = null, schmutzig = false, sendet = false, timer = null, poll = null, offline = false, modus = 'an';
+
+    const lies = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+    const schreib = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+    const klon = o => JSON.parse(JSON.stringify(o));
+
+    async function rpc(fn, args) {
+      const r = await fetch(cfg.url.replace(/\/$/, '') + '/rest/v1/rpc/' + fn, {
+        method: 'POST', headers: { apikey: cfg.key, 'Content-Type': 'application/json' }, body: JSON.stringify(args),
+      });
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }
+
+    /* Drei-Wege-Abgleich: b = Stand bei letztem Abgleich, l = lokal, s = Server */
+    const schl = x => (x && typeof x === 'object') ? (x.rid ?? x.id ?? x.name ?? x.text ?? JSON.stringify(x)) : String(x);
+    const gleich = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    function mische(b, l, s) {
+      if (Array.isArray(l) || Array.isArray(s)) {
+        const B = new Map((b || []).map(x => [schl(x), x])), L = new Map((l || []).map(x => [schl(x), x]));
+        const erg = [], gesehen = new Set();
+        for (const x of (s || [])) {
+          const k = schl(x); gesehen.add(k);
+          if (B.has(k) && !L.has(k)) continue;                       // lokal entfernt
+          erg.push(L.has(k) && !gleich(L.get(k), B.get(k)) ? L.get(k) : x); // lokal geändert → lokal
+        }
+        for (const [k, x] of L) if (!gesehen.has(k) && !B.has(k)) erg.push(x); // lokal neu
+        return erg;
+      }
+      if (l && s && typeof l === 'object' && typeof s === 'object') {
+        const erg = {}, bb = b || {};
+        for (const k of new Set([...Object.keys(l), ...Object.keys(s)])) {
+          if (!(k in l)) { if (k in bb) continue; erg[k] = s[k]; continue; }   // lokal gelöscht
+          if (!(k in s)) { if (k in bb && gleich(bb[k], l[k])) continue; erg[k] = l[k]; continue; } // woanders gelöscht
+          erg[k] = (typeof l[k] === 'object' || typeof s[k] === 'object') ? mische(bb[k], l[k], s[k]) : (gleich(l[k], bb[k]) ? s[k] : l[k]);
+        }
+        return erg;
+      }
+      return gleich(l, b) ? s : l;
+    }
+
+    /* ---------- Anzeige ---------- */
+    function zeigeStatus() {
+      if (!sitz) { $('#konto').hidden = true; return; }
+      $('#konto').hidden = false;
+      $('#konto-name').textContent = sitz.name;
+      const p = $('#konto-punkt');
+      const t = offline ? 'Offline – wird nachgeholt' : (schmutzig || sendet) ? 'Speichert …' : 'Synchron auf allen Geräten';
+      p.className = 'konto-punkt' + (offline ? ' aus' : (schmutzig || sendet) ? ' arbeit' : '');
+      $('#konto-status').textContent = 'Angemeldet als ' + sitz.name + '. ' + t + '.';
+    }
+    function maske(zeigen) {
+      $('#anmeldung').classList.toggle('zeigen', zeigen);
+      document.body.style.overflow = zeigen ? 'hidden' : '';
+      if (zeigen) setTimeout(() => $('#an-name').focus(), 50);
+    }
+    function setzeModus(m) {
+      modus = m;
+      document.querySelectorAll('.an-reiter button').forEach(b => b.classList.toggle('aktiv', b.dataset.modus === m));
+      $('#an-los').textContent = m === 'an' ? 'Anmelden' : 'Konto erstellen';
+      $('#an-pw').autocomplete = m === 'an' ? 'current-password' : 'new-password';
+      $('#an-text').textContent = m === 'an'
+        ? 'Melde dich an, damit deine Einkaufsliste auf PC und Handy gleich bleibt.'
+        : 'Name und Passwort reichen, keine E-Mail nötig. Deine Liste von diesem Gerät nehme ich mit. Das Passwort lässt sich nicht zurücksetzen – merk es dir.';
+      $('#an-fehler').textContent = '';
+    }
+
+    /* ---------- Sitzung ---------- */
+    function uebernehmen(antwort) {
+      sitz = { token: antwort.token, name: antwort.name };
+      schreib(SK, sitz);
+      Speicher.schluessel = 'prepd-liste-v1:' + sitz.name;
+      rev = antwort.rev; basis = klon(Object.assign(leererZustand(), antwort.zustand || {}));
+      Z = klon(basis);
+      Speicher.speichern(Z); schreib('prepd-basis:' + sitz.name, { rev, basis });
+      schmutzig = false; Sync = api; maske(false); zeigeStatus(); alles(); beginnePolling();
+    }
+    function raus(grund) {
+      if (sitz) { try { rpc('prepd_abmelden', { p_token: sitz.token }).catch(() => {}); } catch (e) {} }
+      sitz = null; schreib(SK, null); clearInterval(poll); clearTimeout(timer); Sync = null; schmutzig = false;
+      Speicher.schluessel = 'prepd-liste-v1';
+      Z = leererZustand(); alles(); zeigeStatus(); setzeModus('an'); maske(true);
+      if (grund) $('#an-fehler').textContent = grund;
+    }
+
+    async function absenden(ev) {
+      ev.preventDefault();
+      const name = $('#an-name').value.trim().toLowerCase(), pw = $('#an-pw').value, f = $('#an-fehler'), knopf = $('#an-los');
+      f.textContent = ''; knopf.disabled = true;
+      try {
+        const a = modus === 'an'
+          ? await rpc('prepd_anmelden', { p_name: name, p_pw: pw })
+          : await rpc('prepd_registrieren', { p_name: name, p_pw: pw, p_zustand: Z });
+        if (a.fehler) {
+          f.textContent = ({
+            name: 'Benutzername: 3–24 Zeichen, nur Kleinbuchstaben, Zahlen, _ . -',
+            pw: 'Das Passwort braucht mindestens 6 Zeichen.',
+            vergeben: 'Der Name ist schon vergeben.',
+            voll: 'Es sind keine weiteren Konten möglich.',
+            gross: 'Die Liste ist zu groß.',
+            falsch: 'Name oder Passwort stimmt nicht.',
+            gesperrt: 'Zu viele Versuche. Bitte in 15 Minuten nochmal.',
+          })[a.fehler] || 'Das hat nicht geklappt.';
+        } else { $('#an-pw').value = ''; uebernehmen(a); }
+      } catch (e) { f.textContent = 'Keine Verbindung. Bitte später nochmal.'; }
+      knopf.disabled = false;
+    }
+
+    /* ---------- Hoch- und Runterladen ---------- */
+    async function senden() {
+      if (!sitz || sendet) return;
+      sendet = true; zeigeStatus();
+      try {
+        for (let i = 0; i < 4 && schmutzig; i++) {
+          const gesendet = klon(Z);
+          const a = await rpc('prepd_speichern', { p_token: sitz.token, p_rev: rev, p_zustand: gesendet });
+          if (a.fehler === 'sitzung') return raus('Bitte neu anmelden.');
+          if (a.fehler) throw new Error(a.fehler);
+          if (a.konflikt) {
+            const serv = Object.assign(leererZustand(), a.zustand || {});
+            Z = Object.assign(leererZustand(), mische(basis, Z, serv)); rev = a.rev; basis = klon(serv);
+            Speicher.speichern(Z); alles(); continue;       // zusammengeführt → nochmal senden
+          }
+          rev = a.rev; basis = gesendet;
+          if (gleich(Z, gesendet)) schmutzig = false;
+        }
+        offline = false; schreib('prepd-basis:' + sitz.name, { rev, basis });
+      } catch (e) { offline = true; if (schmutzig) { clearTimeout(timer); timer = setTimeout(senden, 8000); } }
+      sendet = false; zeigeStatus();
+    }
+    async function holen() {
+      if (!sitz || sendet || schmutzig) return;
+      try {
+        const a = await rpc('prepd_laden', { p_token: sitz.token });
+        if (a.fehler === 'sitzung') return raus('Bitte neu anmelden.');
+        offline = false;
+        if (a.rev !== rev && !schmutzig && !sendet) {
+          const serv = Object.assign(leererZustand(), a.zustand || {});
+          Z = klon(serv); rev = a.rev; basis = klon(serv);
+          Speicher.speichern(Z); schreib('prepd-basis:' + sitz.name, { rev, basis }); alles();
+        }
+      } catch (e) { offline = true; }
+      zeigeStatus();
+    }
+    function geaendert() { schmutzig = true; zeigeStatus(); clearTimeout(timer); timer = setTimeout(senden, 900); }
+    function beginnePolling() { clearInterval(poll); poll = setInterval(() => { if (!document.hidden) holen(); }, 20000); }
+    const api = { geaendert };
+
+    /* ---------- Start ---------- */
+    function start() {
+      if (!aktiv) return;                       // ohne config.js: rein lokal
+      $('#an-form').addEventListener('submit', absenden);
+      document.querySelectorAll('.an-reiter button').forEach(b => b.addEventListener('click', () => setzeModus(b.dataset.modus)));
+      $('#konto-knopf').addEventListener('click', e => { e.stopPropagation(); $('#konto-menue').classList.toggle('offen'); });
+      document.addEventListener('click', e => { if (!e.target.closest('#konto')) $('#konto-menue').classList.remove('offen'); });
+      $('#abmelden').addEventListener('click', () => { $('#konto-menue').classList.remove('offen'); raus(); });
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) { schmutzig ? senden() : holen(); } });
+      window.addEventListener('online', () => { schmutzig ? senden() : holen(); });
+      window.addEventListener('focus', () => { if (sitz) (schmutzig ? senden() : holen()); });
+      const gespeichert = lies(SK);
+      if (!gespeichert) { Z = leererZustand(); alles(); setzeModus('an'); maske(true); return; }
+      sitz = gespeichert; Speicher.schluessel = 'prepd-liste-v1:' + sitz.name;
+      const kopie = lies('prepd-basis:' + sitz.name);
+      Z = Object.assign(leererZustand(), Speicher.laden() || {});
+      rev = kopie ? kopie.rev : 0; basis = kopie ? kopie.basis : klon(Z);
+      Sync = api; zeigeStatus(); alles(); beginnePolling();
+      // Beim Start: Ungesendetes (Z ≠ Basis) hochladen, sonst neuen Stand holen
+      if (!gleich(Z, basis)) { schmutzig = true; senden(); } else holen();
+    }
+    return { start };
+  })();
 
   /* ---------------- Merkliste (Posten außerhalb der Rezepte) ---------------- */
   const KATEGORIEN = ['Haushalt', 'Getränke', 'Frühstück', 'Snacks', 'Hygiene', 'Sonstiges'];
@@ -1284,6 +1518,7 @@
 
   navigieren();
   alles();
+  Wolke.start();
 })();
 </script>
 </body>
