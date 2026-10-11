@@ -198,7 +198,7 @@
   .auswahl-kopf h2 { margin: 0; font-size: 19px; line-height: 1.2; }
   .auswahl-kopf span { color: var(--honig-text); font-size: 13.5px; margin-left: auto; text-align: right; }
   .auswahl .rezepte { max-width: none; }
-  @media (min-width: 820px) { .auswahl .rezepte { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 560px) { .auswahl .rezepte { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (min-width: 1100px) { .auswahl { max-width: 980px; } }
   .rezepte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   @media (min-width: 560px) { .rezepte { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -1302,7 +1302,7 @@
     liste.sort(sortierer[filter.sort]);
     sichtbar = liste;
     // Noahs Auswahl: nur ohne Suche, und dann nicht doppelt im Rest der Liste
-    const fav = (D.favoriten || []).map(id => REZ[id]).filter(Boolean).slice(0, 4);
+    const fav = (D.favoriten || []).map(id => REZ[id]).filter(Boolean).slice(0, 3);
     const zeigeAuswahl = fav.length > 0 && !q;
     $('#auswahl').hidden = !zeigeAuswahl;
     if (zeigeAuswahl) {
