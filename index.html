@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prepd</title>
+<meta name="description" content="Rezeptbuch, Einkaufsliste und Nährwerte für Meal Prep.">
+<meta name="theme-color" content="#FAF5EA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Prepd">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23B4532F'/%3E%3Cpath d='M22 46V18h11a9 9 0 0 1 0 18H22' fill='none' stroke='%23FAF5EA' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --creme: #FAF5EA;
+    --papier: #FFFDF8;
+    --tinte: #2D2A22;
+    --tinte-2: #6E6656;
+    --tinte-3: #A39A88;
+    --linie: #EBE2D0;
+    --rahmen: #C8C6C0;
+    --terrakotta: #B4532F;
+    --terrakotta-dunkel: #8F3F21;
+    --terrakotta-hell: #F6E1D6;
+    --salbei: #6F8A63;
+    --salbei-dunkel: #4E6645;
+    --salbei-hell: #E4ECDC;
+    --honig: #DE9B2F;
+    --honig-hell: #FBEACB;
+    --schatten: 0 1px 0 rgba(84, 60, 30, .05), 0 10px 28px -18px rgba(84, 60, 30, .35);
+    --font: "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --nav-h: 68px;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--creme);
+    color: var(--tinte);
+    font-family: var(--font);
+    font-optical-sizing: auto;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2.5px solid var(--terrakotta); outline-offset: 2px; border-radius: 8px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------- Rahmen ---------- */
+  .kopf {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--creme) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s;
+  }
+  .kopf.gescrollt { border-bottom-color: var(--linie); }
+  .kopf-innen {
+    max-width: 1120px; margin: 0 auto;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 12px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .marke {
+    font-size: 30px; font-weight: 800; letter-spacing: -0.04em; line-height: 1;
+    font-variation-settings: "wdth" 85;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .marke-punkt { width: 10px; height: 10px; border-radius: 50%; background: var(--terrakotta); transform: translateY(6px); }
+  .reiter-oben { display: none; margin-left: auto; gap: 4px; background: var(--papier); border: 1px solid var(--linie); border-radius: 999px; padding: 4px; }
+  .reiter-oben a {
+    text-decoration: none; color: var(--tinte-2); font-weight: 600; font-size: 15px;
+    padding: 8px 16px; border-radius: 999px; display: flex; align-items: center; gap: 8px;
+  }
+  .reiter-oben a[aria-current="page"] { background: var(--tinte); color: var(--creme); }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 4px 16px calc(var(--nav-h) + 32px + env(safe-area-inset-bottom)); }
+  .ansicht[hidden] { display: none; }
+
+  h1 { font-size: 34px; line-height: 1.12; letter-spacing: -0.025em; font-weight: 750; margin: 20px 0 6px; font-variation-settings: "wdth" 88; }
+  .unterzeile { color: var(--tinte-2); margin: 0 0 20px; max-width: 58ch; line-height: 1.6; }
+
+  /* ---------- Navigation unten (Handy) ---------- */
+  .reiter-unten {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: color-mix(in srgb, var(--papier) 92%, transparent);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--linie);
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  }
+  .reiter-unten a {
+    text-decoration: none; color: var(--tinte-3);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font-size: 12px; font-weight: 600; padding: 6px 0; position: relative;
+  }
+  .reiter-unten a svg { width: 24px; height: 24px; }
+  .reiter-unten a[aria-current="page"] { color: var(--terrakotta); }
+  .zaehler {
+    min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+    background: var(--terrakotta); color: #fff; font-size: 11px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+  }
+  .reiter-unten .zaehler { position: absolute; top: 2px; left: calc(50% + 6px); }
+  .zaehler:empty { display: none; }
+
+  @media (min-width: 820px) {
+    .reiter-unten { display: none; }
+    .reiter-oben { display: flex; }
+    main { padding-bottom: 64px; }
+    h1 { font-size: 44px; margin-top: 28px; }
+  }
+
+  /* ---------- Suche & Filter ---------- */
+  .werkzeug { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .suche {
+    flex: 1 1 260px; display: flex; align-items: center; gap: 8px;
+    background: var(--papier); border: 1px solid var(--linie); border-radius: 14px; padding: 0 14px;
+  }
+  .suche svg { width: 18px; height: 18px; color: var(--tinte-3); flex: none; }
+  .suche input { border: 0; background: none; outline: none; padding: 12px 0; width: 100%; font-size: 16px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--linie); background: var(--papier); color: var(--tinte-2);
+    border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 600;
+  }
+  .chip[aria-pressed="true"] { background: var(--salbei-hell); border-color: var(--salbei); color: var(--salbei-dunkel); }
+  .sortierung {
+    border: 1px solid var(--linie); background: var(--papier); border-radius: 999px;
+    padding: 8px 12px; font-size: 14px; font-weight: 600; color: var(--tinte-2);
+  }
+
+  /* ---------- Rezeptkacheln ---------- */
+  .rezepte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  @media (min-width: 560px) { .rezepte { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 820px) { .rezepte { gap: 18px; } }
+  @media (min-width: 1100px) { .rezepte { max-width: 980px; } }
+
+  .kachel {
+    position: relative; display: flex; flex-direction: column;
+    background: var(--papier); border: 1px solid var(--linie); border-radius: 20px;
+    overflow: hidden; box-shadow: var(--schatten); text-align: left;
+  }
+  .kachel.auf-liste { border-color: color-mix(in srgb, var(--salbei) 60%, var(--linie)); }
+  .kachel-oeffnen { position: absolute; inset: 0; z-index: 1; border: 0; background: none; }
+  .kachel-bild { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--creme); }
+  .kachel-bild img, .blatt-bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .platzhalter { position: absolute; inset: 0; display: grid; place-items: center; }
+  .platzhalter svg { width: 42%; max-width: 86px; height: auto; opacity: .42; }
+  .kachel-text { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 7px; flex: 1; pointer-events: none; }
+  .kachel-name {
+    font-size: 16px; line-height: 1.35; font-weight: 700; letter-spacing: -0.005em; margin: 0;
+    hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word;
+  }
+  .makros {
+    display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 13.5px; line-height: 1.6;
+    color: var(--tinte-2); font-variant-numeric: tabular-nums; margin-top: auto;
+  }
+  .makros b { color: var(--tinte); font-weight: 650; }
+  .marken { display: flex; flex-wrap: wrap; gap: 5px; }
+  .marke-klein {
+    font-size: 12px; font-weight: 600; line-height: 1.5; padding: 2px 8px; border-radius: 7px;
+    background: var(--creme); color: var(--tinte-2); display: inline-flex; align-items: center; gap: 5px;
+  }
+  .marke-klein svg { width: 12px; height: 12px; flex: none; }
+  .marke-klein.prep { background: var(--salbei-hell); color: var(--salbei-dunkel); }
+  .marke-klein.teilt { background: var(--honig-hell); color: #7A520F; }
+
+  .bild-fahne {
+    position: absolute; z-index: 2; left: 9px; top: 9px;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 650; line-height: 1.5; padding: 4px 9px; border-radius: 8px;
+    background: color-mix(in srgb, var(--salbei) 92%, transparent); color: #fff;
+    box-shadow: 0 2px 8px -2px rgba(45, 42, 34, .45);
+  }
+  .bild-fahne svg { width: 13px; height: 13px; }
+  .plus {
+    position: relative; z-index: 2;
+    width: 42px; height: 42px; border-radius: 50%; border: 0;
+    background: var(--terrakotta); color: #fff;
+    display: grid; place-items: center;
+    transition: transform .15s, background .2s;
+  }
+  .kachel .plus {
+    position: absolute; right: 9px; bottom: 9px;
+    box-shadow: 0 3px 12px -2px rgba(45, 42, 34, .5);
+  }
+  .plus svg { width: 21px; height: 21px; }
+  .plus:active { transform: scale(.9); }
+  .plus.drin { background: var(--salbei); }
+  .leer {
+    border: 1.5px dashed var(--linie); border-radius: 22px; padding: 28px 20px; text-align: center; color: var(--tinte-2);
+  }
+  .leer strong { display: block; color: var(--tinte); font-size: 18px; margin-bottom: 4px; }
+
+  /* ---------- Einkaufsliste ---------- */
+  .einkauf { display: grid; gap: 20px; }
+  @media (min-width: 900px) { .einkauf { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } .seitenleiste { position: sticky; top: 96px; } }
+  .eingabe {
+    display: flex; gap: 8px; background: var(--papier); border: 1px solid var(--linie);
+    border-radius: 16px; padding: 6px 6px 6px 14px; margin-bottom: 18px; box-shadow: var(--schatten);
+  }
+  .eingabe input { flex: 1; border: 0; outline: none; background: none; font-size: 16px; min-width: 0; }
+  .knopf {
+    border: 0; border-radius: 12px; padding: 10px 16px; font-weight: 650; font-size: 15px;
+    background: var(--tinte); color: var(--creme);
+  }
+  .knopf.zweit { background: var(--papier); color: var(--tinte); border: 1px solid var(--linie); }
+  .knopf.terra { background: var(--terrakotta); color: #fff; }
+  .knopf.salbei { background: var(--salbei); color: #fff; }
+  .knopf:disabled { opacity: .45; cursor: default; }
+  .knopf-text { border: 0; background: none; color: var(--tinte-2); font-weight: 600; font-size: 14px; padding: 8px 4px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--linie); }
+
+  .gruppe { margin-bottom: 14px; border: 1.5px solid var(--rahmen); background: #F4EFE3; border-radius: 24px; padding: 14px 12px 12px; }
+  .gruppe-titel { font-size: 15px; font-weight: 700; color: var(--tinte-2); margin: 0 0 10px 4px; display: flex; align-items: baseline; gap: 8px; }
+  .gruppe-titel span { font-weight: 500; color: var(--tinte-3); font-size: 13px; }
+  .liste { background: var(--papier); border: 1px solid var(--linie); border-radius: 16px; overflow: hidden; }
+  .gruppe.basics { border-style: dashed; }
+  .gruppe.basics .liste { background: transparent; }
+  .posten { border-top: 1px solid var(--linie); }
+  .posten:first-child { border-top: 0; }
+  .posten-zeile { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px; }
+  .haken {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--tinte-3); background: none;
+    display: grid; place-items: center; padding: 0; color: transparent; transition: background .15s, border-color .15s;
+  }
+  .haken svg { width: 16px; height: 16px; }
+  .posten.erledigt .haken { background: var(--salbei); border-color: var(--salbei); color: #fff; }
+  .posten-name { font-weight: 600; line-height: 1.4; }
+  .posten.erledigt .posten-name { text-decoration: line-through; text-decoration-color: var(--tinte-3); color: var(--tinte-3); }
+  .herkunft { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .herkunft span { font-size: 12px; line-height: 1.55; color: var(--tinte-2); background: var(--creme); border-radius: 6px; padding: 2px 7px; }
+  .herkunft span.hinweis { background: none; padding: 0; color: var(--tinte-3); font-style: italic; }
+  .menge {
+    border: 1px solid var(--linie); background: var(--creme); border-radius: 10px;
+    padding: 6px 10px; font-weight: 650; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .menge.angepasst { border-color: var(--honig); background: var(--honig-hell); }
+  .posten.erledigt .menge { color: var(--tinte-3); }
+  .bearbeiten { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 12px 12px 52px; }
+  .bearbeiten[hidden] { display: none; }
+  .stepper { display: inline-flex; align-items: center; border: 1px solid var(--linie); border-radius: 12px; background: var(--creme); overflow: hidden; }
+  .stepper button { border: 0; background: none; width: 40px; height: 38px; font-size: 20px; font-weight: 600; }
+  .stepper input { width: 64px; border: 0; background: none; text-align: center; font-weight: 650; font-variant-numeric: tabular-nums; outline: none; -moz-appearance: textfield; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .einheit { color: var(--tinte-2); font-size: 14px; }
+  .loeschen { border: 0; background: none; color: var(--terrakotta); font-weight: 600; font-size: 14px; padding: 8px; margin-left: auto; }
+
+  .panel { background: var(--papier); border: 1.5px solid var(--rahmen); border-radius: 24px; padding: 16px; margin-bottom: 14px; }
+  .panel h2 { font-size: 18px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .panel p.klein { margin: 0 0 12px; color: var(--tinte-2); font-size: 14px; }
+  .gericht-zeile { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--linie); }
+  .gericht-zeile:first-of-type { border-top: 0; }
+  .gericht-zeile .name { flex: 1; min-width: 0; font-weight: 600; line-height: 1.4; }
+  .gericht-zeile .name small { display: block; font-weight: 500; color: var(--tinte-2); font-size: 13px; }
+  .x { border: 0; background: var(--creme); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--tinte-2); flex: none; }
+  .x svg { width: 16px; height: 16px; }
+  .vorschlag { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--linie); }
+  .vorschlag:first-of-type { border-top: 0; }
+  .vorschlag .name { flex: 1; min-width: 0; font-weight: 600; line-height: 1.4; }
+  .vorschlag .name small { display: block; font-weight: 500; color: var(--salbei-dunkel); font-size: 13px; margin-top: 2px; }
+  .vorschlag .plus { width: 38px; height: 38px; }
+  .listen-fuss { display: flex; gap: 16px; flex-wrap: wrap; justify-content: flex-end; margin-top: 6px; }
+
+  /* ---------- Lebensmittel ---------- */
+  .lm-tabelle { background: var(--papier); border: 1px solid var(--linie); border-radius: 16px; overflow: hidden; }
+  .lm-zeile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 16px; padding: 13px 14px; border-top: 1px solid var(--linie); align-items: center; }
+  .lm-zeile:first-child { border-top: 0; }
+  .lm-name { font-weight: 650; line-height: 1.4; }
+  .lm-name small { display: block; font-weight: 500; color: var(--tinte-2); font-size: 13px; margin-top: 2px; }
+  .lm-werte { display: flex; gap: 14px; align-items: baseline; font-variant-numeric: tabular-nums; font-size: 14px; line-height: 1.5; color: var(--tinte-2); }
+  .lm-werte .e { font-weight: 700; color: var(--tinte); }
+  .lm-werte .e small { font-weight: 500; color: var(--tinte-2); margin-left: 2px; }
+  .dichte { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--tinte-2); }
+  .dichte-balken { flex: 1; max-width: 220px; height: 6px; border-radius: 3px; background: var(--creme); overflow: hidden; }
+  .dichte-balken i { display: block; height: 100%; background: var(--salbei); border-radius: 3px; }
+  @media (max-width: 480px) { .lm-werte .nebenwert { display: none; } }
+
+  /* ---------- Rezept-Detail ---------- */
+  .schleier { position: fixed; inset: 0; z-index: 50; background: rgba(45, 42, 34, .38); opacity: 0; transition: opacity .25s; }
+  .schleier.offen { opacity: 1; }
+  .blatt {
+    position: fixed; z-index: 51; left: 0; right: 0; bottom: 0;
+    max-height: 92vh; overflow: auto; overscroll-behavior: contain;
+    background: var(--papier); border-radius: 26px 26px 0 0;
+    padding: 10px 18px calc(24px + env(safe-area-inset-bottom));
+    transform: translateY(100%); transition: transform .32s cubic-bezier(.2, .8, .2, 1);
+  }
+  .blatt.offen { transform: none; }
+  .griff { width: 40px; height: 5px; border-radius: 3px; background: var(--linie); margin: 0 auto 14px; }
+  @media (min-width: 820px) {
+    .blatt { left: 50%; right: auto; bottom: auto; top: 50%; width: min(680px, 92vw); max-height: 86vh; border-radius: 26px; transform: translate(-50%, -46%); opacity: 0; transition: transform .28s cubic-bezier(.2, .8, .2, 1), opacity .2s; padding: 24px 28px 28px; }
+    .blatt.offen { transform: translate(-50%, -50%); opacity: 1; }
+    .griff { display: none; }
+  }
+  .blatt[hidden], .schleier[hidden] { display: none; }
+  .blatt-kopf { display: flex; align-items: flex-start; gap: 12px; }
+  .blatt-kopf h2 { flex: 1; font-size: 25px; line-height: 1.25; letter-spacing: -0.015em; margin: 2px 0 0; font-variation-settings: "wdth" 90; }
+  .naehrwerte { background: var(--honig-hell); border-radius: 18px; padding: 15px 18px; margin: 18px 0 8px; }
+  .naehrwerte dl { margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px 14px; font-variant-numeric: tabular-nums; }
+  .naehrwerte dt { font-size: 12.5px; line-height: 1.5; color: #7A520F; font-weight: 600; }
+  .naehrwerte dd { margin: 0; font-weight: 700; font-size: 19px; line-height: 1.3; grid-row: 2; letter-spacing: -0.01em; }
+  .naehrwerte-kopf { font-size: 12.5px; font-weight: 600; color: #7A520F; margin: 0 0 8px; }
+  .naehrwerte-fuss { font-size: 13.5px; line-height: 1.55; color: var(--tinte-2); margin: 0 0 18px 4px; }
+  .blatt-bild { margin: 0 -18px 4px; border-radius: 14px 14px 0 0; aspect-ratio: 16 / 9; position: relative; overflow: hidden; background: var(--creme); }
+  .blatt-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @media (min-width: 820px) { .blatt-bild { margin: -24px -28px 6px; border-radius: 26px 26px 0 0; } }
+  .portionen { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 16px 0; border-top: 1px solid var(--linie); border-bottom: 1px solid var(--linie); }
+  .portionen .text { flex: 1 1 200px; }
+  .portionen .text strong { display: block; }
+  .portionen .text span { font-size: 13.5px; color: var(--tinte-2); }
+  .blatt h3 { font-size: 17px; margin: 26px 0 10px; letter-spacing: -0.005em; }
+  .zutaten { list-style: none; margin: 0; padding: 0; }
+  .zutaten li { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px dotted var(--linie); line-height: 1.5; }
+  .zutaten li span:last-child { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .zutaten li.basic span:first-child::after { content: "  wahrscheinlich da"; color: var(--tinte-3); font-size: 13px; }
+  .schritte { margin: 0; padding-left: 24px; }
+  .schritte li { padding: 6px 0 10px 6px; max-width: 62ch; line-height: 1.65; }
+  .schritte li::marker { color: var(--terrakotta); font-weight: 700; }
+  .notiz { margin: 0; padding: 12px 14px; background: var(--salbei-hell); border-radius: 14px; color: var(--salbei-dunkel); max-width: 62ch; }
+  .blatt-aktionen { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; position: sticky; bottom: calc(-24px - env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--papier) 70%, transparent); padding: 14px 0 4px; }
+  .blatt-aktionen .knopf { flex: 1 1 auto; padding: 14px 18px; font-size: 16px; border-radius: 14px; }
+
+  /* ---------- Merkliste & Blacklist ---------- */
+  .panel-kopf { display: flex; align-items: baseline; gap: 12px; }
+  .panel-kopf h2 { flex: 1; margin: 0; }
+  .panel-kopf .knopf-text { padding: 0; flex: none; }
+  .merk-kat { font-size: 12.5px; font-weight: 650; color: var(--tinte-3); margin: 14px 0 7px; }
+  .merk-kat:first-of-type { margin-top: 10px; }
+  .merk-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .merk-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--linie); background: var(--creme); color: var(--tinte);
+    border-radius: 999px; padding: 7px 13px; font-size: 14px; font-weight: 600; line-height: 1.4;
+  }
+  .merk-chip svg { width: 13px; height: 13px; color: var(--tinte-3); flex: none; }
+  .merk-chip.dabei { background: var(--salbei-hell); border-color: var(--salbei-hell); color: var(--salbei-dunkel); opacity: 1; }
+  .merk-chip.dabei svg { color: var(--salbei); }
+  .merk-chip.weg { background: var(--terrakotta-hell); border-color: var(--terrakotta-hell); color: var(--terrakotta-dunkel); }
+  .merk-chip.weg svg { color: var(--terrakotta); }
+  .panel.bl { margin-bottom: 20px; }
+  .eingabe.klein-eingabe { margin: 12px 0 0; box-shadow: none; }
+  .eingabe.klein-eingabe input { font-size: 15px; }
+  .eingabe.klein-eingabe .knopf { padding: 9px 14px; font-size: 14px; }
+  .mag-nicht {
+    border: 0; background: none; padding: 4px; border-radius: 8px; color: var(--tinte-3);
+    display: inline-grid; place-items: center; flex: none;
+  }
+  .mag-nicht svg { width: 18px; height: 18px; }
+  .mag-nicht.aktiv { color: var(--terrakotta); }
+  .lm-zeile.nogo .lm-name { color: var(--tinte-3); text-decoration: line-through; text-decoration-color: var(--tinte-3); }
+  .marke-klein.nogo { background: var(--terrakotta-hell); color: var(--terrakotta-dunkel); }
+
+  /* ---------- Kochmodus ---------- */
+  .koch { position: fixed; inset: 0; z-index: 70; background: var(--creme); display: flex; flex-direction: column; }
+  .koch[hidden] { display: none; }
+  .koch-kopf { padding: calc(12px + env(safe-area-inset-top)) 16px 10px; display: flex; align-items: center; gap: 12px; }
+  .koch-kopf .wo { flex: 1; min-width: 0; }
+  .koch-kopf .wo strong { display: block; font-size: 15px; font-weight: 700; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .koch-kopf .wo span { font-size: 13px; color: var(--tinte-2); }
+  .fortschritt { height: 3px; background: var(--linie); margin: 0 16px; border-radius: 2px; overflow: hidden; }
+  .fortschritt i { display: block; height: 100%; background: var(--terrakotta); border-radius: 2px; transition: width .3s; }
+  .koch-inhalt { flex: 1; overflow: auto; padding: 26px 20px 20px; max-width: 640px; width: 100%; margin: 0 auto; }
+  .koch-titel { font-size: 27px; line-height: 1.22; letter-spacing: -0.02em; font-weight: 750; margin: 0 0 14px; font-variation-settings: "wdth" 90; }
+  .koch-text { font-size: 18.5px; line-height: 1.7; margin: 0; max-width: 42ch; }
+  .koch-zutaten { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 1px; background: var(--linie); border: 1px solid var(--linie); border-radius: 16px; overflow: hidden; }
+  .koch-zutaten li { display: flex; justify-content: space-between; gap: 14px; padding: 11px 14px; background: var(--papier); line-height: 1.5; }
+  .koch-zutaten li span:last-child { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .koch-zutaten li.basic span:first-child { color: var(--tinte-2); }
+  .dafuer { font-size: 13px; font-weight: 650; color: var(--tinte-2); margin: 24px 0 8px; }
+  .timer-kasten { margin: 22px 0 0; background: var(--honig-hell); border-radius: 18px; padding: 16px 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .timer-zahl { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: #7A520F; font-variation-settings: "wdth" 80; }
+  .timer-kasten.aus { background: var(--salbei-hell); }
+  .timer-kasten.aus .timer-zahl { color: var(--salbei-dunkel); }
+  .timer-kasten .knopf { margin-left: auto; }
+  .koch-fuss { display: flex; gap: 10px; padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--linie); background: var(--papier); }
+  .koch-fuss .knopf { flex: 1; padding: 15px 18px; font-size: 16px; border-radius: 14px; }
+  .koch-fuss .knopf.zweit { flex: 0 0 auto; }
+  .fertig-text { text-align: center; padding: 30px 0; }
+  .fertig-text .gross { font-size: 46px; line-height: 1; }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed; left: 50%; bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom)); z-index: 60;
+    transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+    background: var(--tinte); color: var(--creme); padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 14.5px;
+    transition: opacity .2s, transform .25s; max-width: calc(100vw - 32px); text-align: center;
+  }
+  .toast.zeigen { opacity: 1; transform: translate(-50%, 0); }
+  @media (min-width: 820px) { .toast { bottom: 28px; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="kopf" id="kopf">
+  <div class="kopf-innen">
+    <div class="marke" aria-label="Prepd">Prepd<span class="marke-punkt" aria-hidden="true"></span></div>
+    <nav class="reiter-oben" aria-label="Bereiche">
+      <a href="#rezepte" data-reiter="rezepte">Rezepte</a>
+      <a href="#einkauf" data-reiter="einkauf">Einkaufsliste <span class="zaehler" data-zaehler></span></a>
+      <a href="#lebensmittel" data-reiter="lebensmittel">Lebensmittel</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- REZEPTE -->
+  <section class="ansicht" id="ansicht-rezepte" aria-labelledby="t-rezepte">
+    <h1 id="t-rezepte">Was kochst du?</h1>
+    <p class="unterzeile">Tipp auf das Plus, dann landen die Zutaten auf deiner Einkaufsliste. Die Werte gelten pro Portion.</p>
+    <div class="werkzeug">
+      <label class="suche">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="sr">Rezepte durchsuchen</span>
+        <input type="search" id="rezept-suche" placeholder="Gericht oder Zutat suchen" autocomplete="off">
+      </label>
+      <div class="chips">
+        <button class="chip" data-filter="prep" aria-pressed="false">Meal Prep</button>
+        <button class="chip" data-filter="schnell" aria-pressed="false">Bis 20 Min</button>
+        <button class="chip" data-filter="nogo" aria-pressed="true">Ohne No-Gos</button>
+        <label class="sr" for="sortierung">Sortieren nach</label>
+        <select class="sortierung" id="sortierung">
+          <option value="eiweiss">Meiste Eiweiß</option>
+          <option value="kcal">Wenigste kcal</option>
+          <option value="zeit">Schnellste zuerst</option>
+          <option value="name">A bis Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="rezepte" id="rezept-liste"></div>
+  </section>
+
+  <!-- EINKAUFSLISTE -->
+  <section class="ansicht" id="ansicht-einkauf" aria-labelledby="t-einkauf" hidden>
+    <h1 id="t-einkauf">Einkaufsliste</h1>
+    <p class="unterzeile" id="einkauf-unterzeile"></p>
+    <div class="einkauf">
+      <div>
+        <form class="eingabe" id="eigener-posten" autocomplete="off">
+          <label class="sr" for="eigener-text">Eigenen Posten hinzufügen</label>
+          <input id="eigener-text" placeholder="Etwas dazuschreiben" maxlength="80">
+          <button class="knopf" type="submit">Hinzufügen</button>
+        </form>
+        <div id="einkauf-liste"></div>
+        <div class="listen-fuss" id="listen-fuss"></div>
+      </div>
+      <aside class="seitenleiste" id="seitenleiste"></aside>
+    </div>
+  </section>
+
+  <!-- LEBENSMITTEL -->
+  <section class="ansicht" id="ansicht-lebensmittel" aria-labelledby="t-lm" hidden>
+    <h1 id="t-lm">Lebensmittel</h1>
+    <p class="unterzeile">Nährwerte pro 100 g. Aus diesen Werten rechnen sich auch alle Rezepte zusammen.</p>
+    <div class="werkzeug">
+      <label class="suche">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="sr">Lebensmittel durchsuchen</span>
+        <input type="search" id="lm-suche" placeholder="Lebensmittel suchen" autocomplete="off">
+      </label>
+      <div class="chips">
+        <label class="sr" for="lm-sortierung">Sortieren nach</label>
+        <select class="sortierung" id="lm-sortierung">
+          <option value="gang">Nach Bereich</option>
+          <option value="eiweiss">Meiste Eiweiß</option>
+          <option value="dichte">Eiweiß pro kcal</option>
+          <option value="name">A bis Z</option>
+        </select>
+      </div>
+    </div>
+    <div id="lm-liste"></div>
+  </section>
+</main>
+
+<nav class="reiter-unten" aria-label="Bereiche">
+  <a href="#rezepte" data-reiter="rezepte">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M9 8h6"/></svg>
+    Rezepte
+  </a>
+  <a href="#einkauf" data-reiter="einkauf">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h2l2 11h10l2-8H7"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="16.5" cy="19.5" r="1.3"/></svg>
+    Einkauf
+    <span class="zaehler" data-zaehler></span>
+  </a>
+  <a href="#lebensmittel" data-reiter="lebensmittel">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c-3-3-8-1-8 4 0 5 4 9 6 9 1 0 1.3-.6 2-.6s1 .6 2 .6c2 0 6-4 6-9 0-5-5-7-8-4z"/><path d="M12 7c0-2 1-3.5 3-4"/></svg>
+    Lebensmittel
+  </a>
+</nav>
+
+<div class="schleier" id="schleier" hidden></div>
+<div class="blatt" id="blatt" role="dialog" aria-modal="true" aria-labelledby="blatt-titel" hidden></div>
+<section class="koch" id="koch" aria-label="Kochmodus" hidden></section>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="data.js"></script>
+<script>
+(() => {
+  'use strict';
+  const D = window.PREPD;
+  const LM = Object.fromEntries(D.lebensmittel.map(l => [l.id, l]));
+  const REZ = Object.fromEntries(D.rezepte.map(r => [r.id, r]));
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const ICON = {
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    haken: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    uhr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="8" width="17" height="11" rx="2.5"/><path d="M2.5 8h19l-2-3.5h-15z"/></svg>',
+    kuehl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v18M5 7l14 10M19 7 5 17"/></svg>',
+    daumen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M14 3H7.5a2 2 0 0 0-2 1.6l-1.3 6.4A2 2 0 0 0 6.2 13.5H10l-.8 4.3A2.2 2.2 0 0 0 11.3 20.5L14 14.5z"/><path d="M17.5 3.5h2a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-2z"/></svg>',
+  };
+
+  /* Bild-Platzhalter, solange kein Foto hinterlegt ist. Fünf Motive aus der
+     warmen Palette, je Rezept fest gewählt – so sieht jede Kachel anders aus,
+     bleibt aber in einer Farbfamilie. Sobald in data.js ein `bild` steht
+     (z. B. 'bilder/hackfleisch-bowl.jpg'), liegt das Foto darüber. */
+  const MOTIVE = {
+    schale: { von: '#F7E3D4', bis: '#E3B291', strich: '#9C4F2C', pfad: '<path d="M7 29h50c0 13.8-11.2 25-25 25S7 42.8 7 29z"/><path d="M24 21c0-3 3-4 3-7M32 19c0-3 3-4 3-7M40 21c0-3 3-4 3-7"/>' },
+    pfanne: { von: '#FBEACB', bis: '#EFCC88', strich: '#8A5E14', pfad: '<circle cx="27" cy="34" r="18"/><path d="M45 34h14"/>' },
+    topf:   { von: '#E7EFDF', bis: '#C2D3B4', strich: '#47613E', pfad: '<path d="M12 26h40v18a9 9 0 0 1-9 9H21a9 9 0 0 1-9-9z"/><path d="M7 21h50"/><path d="M26 14h12"/>' },
+    teller: { von: '#F8E7DF', bis: '#E5BBA9', strich: '#9A4F38', pfad: '<circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="12"/>' },
+    glas:   { von: '#F3E9D3', bis: '#DBC692', strich: '#7D6420', pfad: '<path d="M20 23h24v25a6 6 0 0 1-6 6H26a6 6 0 0 1-6-6z"/><rect x="18" y="12" width="28" height="9" rx="2"/>' },
+  };
+  const MOTIV_REGELN = [
+    [/bowl|schale/i, 'schale'],
+    [/pfanne|r(ü|ue)hrei|geschnetzelt|gebraten/i, 'pfanne'],
+    [/curry|chili|suppe|eintopf|linsen|ragout|bolognese/i, 'topf'],
+    [/salat|ofen|blech|auflauf|teller/i, 'teller'],
+    [/quark|skyr|joghurt|shake|m(ü|ue)sli/i, 'glas'],
+  ];
+  const REIHE = Object.keys(MOTIVE);
+  const motivFuer = (r, i) => MOTIVE[r.motiv || (MOTIV_REGELN.find(([re]) => re.test(r.name)) || [])[1] || REIHE[i % REIHE.length]];
+  const bildHTML = r => {
+    const m = motivFuer(r, D.rezepte.indexOf(r));
+    return `<div class="platzhalter" style="background:linear-gradient(150deg,${m.von},${m.bis})" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" stroke="${m.strich}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${m.pfad}</svg>
+      </div>${r.bild ? `<img src="${esc(r.bild)}" alt="" loading="lazy" onerror="this.remove()">` : ''}`;
+  };
+
+  /* ======================================================================
+     Speicher – heute lokal im Browser.
+     Später wird hier Supabase eingesteckt (eine Zeile mit dem ganzen
+     Listen-Zustand als JSON), damit PC und Handy synchron sind.
+     Der Rest der App muss dafür nicht angefasst werden.
+     ====================================================================== */
+  const Speicher = {
+    schluessel: 'prepd-liste-v1',
+    laden() {
+      try { const roh = localStorage.getItem(this.schluessel); if (roh) return JSON.parse(roh); } catch (e) {}
+      return null;
+    },
+    speichern(zustand) {
+      try { localStorage.setItem(this.schluessel, JSON.stringify(zustand)); } catch (e) {}
+    },
+    beobachten(fn) {
+      window.addEventListener('storage', e => { if (e.key === this.schluessel) fn(this.laden()); });
+    },
+  };
+
+  const leererZustand = () => ({
+    v: 2, gerichte: [], delta: {}, erledigt: {}, aus: {}, eigene: [],
+    merk: [],                                   // schon mal gekaufte Posten außerhalb der Rezepte
+    blacklist: ['brokkoli', 'zucchini', 'kohl'], // mag ich nicht
+  });
+  let Z = Object.assign(leererZustand(), Speicher.laden() || {});
+  const sichern = () => { Speicher.speichern(Z); alles(); };
+  Speicher.beobachten(neu => { Z = Object.assign(leererZustand(), neu || {}); alles(); });
+
+  /* ---------------- Merkliste (Posten außerhalb der Rezepte) ---------------- */
+  const KATEGORIEN = ['Haushalt', 'Getränke', 'Frühstück', 'Snacks', 'Hygiene', 'Sonstiges'];
+  const KAT_WOERTER = {
+    Haushalt: /klopapier|toilettenpapier|küchenrolle|zewa|müllbeutel|müllsack|spülmittel|spüllappen|schwamm|putz|waschmittel|weichspüler|alufolie|frischhalte|backpapier|taschentücher|batterie|gefrierbeutel/i,
+    Getränke: /wasser|sprudel|cola|limo|saft|bier|wein|kaffee|tee|energy|eistee|schorle|sirup/i,
+    Frühstück: /brot|brötchen|toast|müsli|haferflocken|marmelade|honig|nutella|cornflakes|croissant/i,
+    Snacks: /schokolade|schoko|chips|riegel|nüsse|erdnuss|gummibär|keks|popcorn|salzstangen|eis\b/i,
+    Hygiene: /zahnpasta|zahnbürste|duschgel|shampoo|deo|rasier|seife|creme|wattestäbchen|pflaster/i,
+  };
+  const katFuer = text => KATEGORIEN.find(k => KAT_WOERTER[k] && KAT_WOERTER[k].test(text)) || 'Sonstiges';
+  const merken = text => {
+    const schl = text.trim().toLowerCase();
+    const da = Z.merk.find(m => m.text.toLowerCase() === schl);
+    if (da) da.zuletzt = Date.now();
+    else Z.merk.push({ text: text.trim(), kat: katFuer(text), zuletzt: Date.now() });
+    if (Z.merk.length > 120) Z.merk.sort((a, b) => b.zuletzt - a.zuletzt).splice(120);
+  };
+
+  /* ---------------- Blacklist ---------------- */
+  const istNogo = name => Z.blacklist.some(b => name.toLowerCase().includes(b));
+  // Welche No-Gos stecken in diesem Rezept?
+  const nogosIm = r => {
+    const treffer = new Set();
+    for (const b of Z.blacklist) {
+      if (r.name.toLowerCase().includes(b)) { treffer.add(b); continue; }
+      for (const [id] of r.zutaten) if (LM[id] && LM[id].name.toLowerCase().includes(b)) treffer.add(b);
+    }
+    return [...treffer].map(b => b.charAt(0).toUpperCase() + b.slice(1));
+  };
+
+  /* ---------------- Rechnen ---------------- */
+  const naehrwerte = (rezept, portionen = rezept.portionen) => {
+    const faktor = portionen / rezept.portionen;
+    const s = { kcal: 0, e: 0, kh: 0, f: 0 };
+    for (const [id, menge] of rezept.zutaten) {
+      const l = LM[id]; if (!l) continue;
+      const gramm = menge * faktor * l.g;
+      for (const k in s) s[k] += gramm / 100 * l.n[k];
+    }
+    const pro = {}; for (const k in s) pro[k] = s[k] / portionen;
+    return { gesamt: s, pro };
+  };
+  const NW = Object.fromEntries(D.rezepte.map(r => [r.id, naehrwerte(r).pro]));
+
+  const zahl = (n, stellen = 0) => n.toLocaleString('de-DE', { maximumFractionDigits: stellen, minimumFractionDigits: 0 });
+  const halbe = n => {
+    const r = Math.round(n * 2) / 2;
+    const ganz = Math.floor(r), halb = r - ganz === 0.5;
+    if (!halb) return String(ganz);
+    return ganz === 0 ? '½' : ganz + '½';
+  };
+  const MEHRZAHL = { Dose: 'Dosen', Scheibe: 'Scheiben', Zehe: 'Zehen' };
+  const mengeText = (menge, einheit) => {
+    if (einheit === 'g' || einheit === 'ml') {
+      if (menge >= 1000) return zahl(menge / 1000, 2) + (einheit === 'g' ? ' kg' : ' l');
+      const r = menge >= 100 ? Math.round(menge / 10) * 10 : Math.round(menge / 5) * 5 || Math.round(menge);
+      return r + ' ' + einheit;
+    }
+    return halbe(menge) + ' ' + (Math.abs(menge - 1) < 1e-9 ? einheit : MEHRZAHL[einheit] || einheit);
+  };
+  const schritt = (einheit, menge) => {
+    if (einheit === 'g' || einheit === 'ml') return menge >= 300 ? 50 : 25;
+    return 0.5;
+  };
+
+  // Listen-Posten aus gewählten Gerichten zusammenrechnen
+  const listenPosten = () => {
+    const sammel = {};
+    for (const g of Z.gerichte) {
+      const r = REZ[g.rid]; if (!r) continue;
+      const f = g.portionen / r.portionen;
+      for (const [id, menge] of r.zutaten) {
+        if (!LM[id]) continue;
+        const p = sammel[id] || (sammel[id] = { id, basis: 0, quellen: [] });
+        p.basis += menge * f;
+        p.quellen.push(r.name);
+      }
+    }
+    return Object.values(sammel).map(p => {
+      const delta = Z.delta[p.id] || 0;
+      return { ...p, lm: LM[p.id], menge: Math.max(0, p.basis + delta), angepasst: Math.abs(delta) > 1e-9 };
+    }).filter(p => !Z.aus[p.id] && p.menge > 1e-9);
+  };
+
+  const listenIds = () => {
+    const ids = new Set();
+    for (const g of Z.gerichte) { const r = REZ[g.rid]; if (r) r.zutaten.forEach(([id]) => ids.add(id)); }
+    return ids;
+  };
+  const geteilt = (rezept, ids) => {
+    const set = new Set();
+    for (const [id] of rezept.zutaten) if (ids.has(id) && LM[id] && !LM[id].basic) set.add(LM[id].name);
+    return [...set];
+  };
+  const imKorb = rid => Z.gerichte.find(g => g.rid === rid);
+
+  /* ---------------- Aktionen ---------------- */
+  const aufraeumen = () => {
+    const ids = listenIds();
+    for (const k of Object.keys(Z.delta)) if (!ids.has(k)) delete Z.delta[k];
+    for (const k of Object.keys(Z.aus)) if (!ids.has(k)) delete Z.aus[k];
+    for (const k of Object.keys(Z.erledigt)) if (k.startsWith('lm:') && !ids.has(k.slice(3))) delete Z.erledigt[k];
+  };
+  const gerichtSetzen = (rid, portionen) => {
+    const r = REZ[rid]; if (!r) return;
+    const da = imKorb(rid);
+    if (da) da.portionen = portionen; else Z.gerichte.push({ rid, portionen });
+    r.zutaten.forEach(([id]) => { delete Z.aus[id]; delete Z.erledigt['lm:' + id]; });
+    sichern();
+    toast(da ? `Aktualisiert: ${r.name}` : `Auf der Liste: ${r.name}`);
+  };
+  const gerichtEntfernen = rid => {
+    const r = REZ[rid];
+    Z.gerichte = Z.gerichte.filter(g => g.rid !== rid);
+    aufraeumen(); sichern();
+    if (r) toast(`Von der Liste genommen: ${r.name}`);
+  };
+
+  let toastTimer;
+  const toast = text => {
+    const t = $('#toast'); t.textContent = text; t.classList.add('zeigen');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('zeigen'), 2200);
+  };
+
+  /* ---------------- Rezepte ---------------- */
+  const filter = { prep: false, schnell: false, nogo: true, suche: '', sort: 'eiweiss' };
+
+  const rezeptKachel = (r, ids) => {
+    const nw = NW[r.id], drin = imKorb(r.id);
+    const teilt = drin ? [] : geteilt(r, ids);
+    const nogo = nogosIm(r);
+    return `
+      <article class="kachel${drin ? ' auf-liste' : ''}">
+        <button class="kachel-oeffnen" data-oeffnen="${r.id}" aria-label="${esc(r.name)} öffnen"></button>
+        <div class="kachel-bild">
+          ${bildHTML(r)}
+          ${drin ? `<span class="bild-fahne">${ICON.haken}${drin.portionen} Portionen</span>` : ''}
+          <button class="plus${drin ? ' drin' : ''}" data-schnell="${r.id}" aria-label="${drin ? esc(r.name) + ' von der Liste nehmen' : esc(r.name) + ' auf die Einkaufsliste'}">
+            ${drin ? ICON.haken : ICON.plus}
+          </button>
+        </div>
+        <div class="kachel-text">
+          <h2 class="kachel-name">${esc(r.name)}</h2>
+          <div class="marken">
+            <span class="marke-klein">${ICON.uhr}${r.zeit} Min</span>
+            ${r.mealPrep
+              ? `<span class="marke-klein prep">${ICON.box}${r.haltbar} ${r.haltbar === 1 ? 'Tag' : 'Tage'}</span>`
+              : `<span class="marke-klein">${ICON.kuehl}${r.haltbar} ${r.haltbar === 1 ? 'Tag' : 'Tage'}</span>`}
+            ${teilt.length ? `<span class="marke-klein teilt" title="${esc(teilt.join(', '))}">Teilt ${teilt.length} ${teilt.length === 1 ? 'Zutat' : 'Zutaten'}</span>` : ''}
+            ${nogo.length ? `<span class="marke-klein nogo">Enthält ${esc(nogo.join(', '))}</span>` : ''}
+          </div>
+          <div class="makros">
+            <span><b>${Math.round(nw.kcal)}</b> kcal</span>
+            <span><b>${Math.round(nw.e)} g</b> Eiweiß</span>
+            <span><b>${Math.round(nw.f)} g</b> Fett</span>
+          </div>
+        </div>
+      </article>`;
+  };
+
+  const rezepteZeigen = () => {
+    const ids = listenIds();
+    const q = filter.suche.trim().toLowerCase();
+    let liste = D.rezepte.filter(r => {
+      if (filter.prep && !r.mealPrep) return false;
+      if (filter.schnell && r.zeit > 20) return false;
+      if (filter.nogo && nogosIm(r).length) return false;
+      if (!q) return true;
+      return r.name.toLowerCase().includes(q) || r.zutaten.some(([id]) => LM[id] && LM[id].name.toLowerCase().includes(q));
+    });
+    const sortierer = {
+      eiweiss: (a, b) => NW[b.id].e - NW[a.id].e,
+      kcal: (a, b) => NW[a.id].kcal - NW[b.id].kcal,
+      zeit: (a, b) => a.zeit - b.zeit,
+      name: (a, b) => a.name.localeCompare(b.name, 'de'),
+    };
+    liste.sort(sortierer[filter.sort]);
+    $('#rezept-liste').innerHTML = liste.length
+      ? liste.map(r => rezeptKachel(r, ids)).join('')
+      : `<div class="leer"><strong>Kein Gericht gefunden</strong>Probier einen anderen Suchbegriff oder schalte die Filter aus.</div>`;
+  };
+
+  /* ---------------- Rezept-Detail ---------------- */
+  let detail = null; // { rid, portionen }
+  const detailZeigen = () => {
+    const r = REZ[detail.rid], p = detail.portionen, f = p / r.portionen;
+    const nw = naehrwerte(r, p), drin = imKorb(r.id);
+    const geaendert = drin && drin.portionen !== p;
+    $('#blatt').innerHTML = `
+      <div class="griff" aria-hidden="true"></div>
+      <div class="blatt-bild">${bildHTML(r)}</div>
+      <div class="blatt-kopf">
+        <h2 id="blatt-titel">${esc(r.name)}</h2>
+        <button class="x" data-schliessen aria-label="Schließen">${ICON.x}</button>
+      </div>
+      <div class="marken">
+        <span class="marke-klein">${ICON.uhr}${r.zeit} Min</span>
+        <span class="marke-klein">${ICON.kuehl}Hält ${r.haltbar} ${r.haltbar === 1 ? 'Tag' : 'Tage'} im Kühlschrank</span>
+        ${r.mealPrep ? `<span class="marke-klein prep">${ICON.box}Meal Prep</span>` : ''}
+      </div>
+      <div class="naehrwerte">
+        <p class="naehrwerte-kopf">Pro Portion</p>
+        <dl>
+          <dt>kcal</dt><dd>${Math.round(nw.pro.kcal)}</dd>
+          <dt>Eiweiß</dt><dd>${Math.round(nw.pro.e)} g</dd>
+          <dt>Kohlenhydrate</dt><dd>${Math.round(nw.pro.kh)} g</dd>
+          <dt>Fett</dt><dd>${Math.round(nw.pro.f)} g</dd>
+        </dl>
+      </div>
+      <p class="naehrwerte-fuss">Ganzes Gericht mit ${p} Portionen: ${zahl(Math.round(nw.gesamt.kcal))} kcal und ${Math.round(nw.gesamt.e)} g Eiweiß</p>
+      <div class="portionen">
+        <div class="text">
+          <strong>Portionen</strong>
+          <span>${r.mealPrep ? 'Für Meal Prep hochstellen, jede Portion ist eine Dose.' : 'Die Mengen passen sich automatisch an.'}</span>
+        </div>
+        <div class="stepper">
+          <button data-port="-1" aria-label="Eine Portion weniger">−</button>
+          <input value="${p}" inputmode="numeric" aria-label="Portionen" id="port-feld">
+          <button data-port="1" aria-label="Eine Portion mehr">+</button>
+        </div>
+      </div>
+      <h3>Zutaten</h3>
+      <ul class="zutaten">
+        ${r.zutaten.map(([id, m]) => { const l = LM[id]; if (!l) return ''; return `<li class="${l.basic ? 'basic' : ''}"><span>${esc(l.name)}</span><span>${mengeText(m * f, l.einheit)}</span></li>`; }).join('')}
+      </ul>
+      <h3>So geht's</h3>
+      <ol class="schritte">${r.schritte.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      ${r.notiz ? `<h3>Notiz</h3><p class="notiz">${esc(r.notiz)}</p>` : ''}
+      <div class="blatt-aktionen">
+        <button class="knopf zweit" data-kochen="${r.id}" style="flex:1 1 100%">Kochen starten</button>
+        ${drin
+          ? `<button class="knopf zweit" data-entfernen="${r.id}">Von der Liste nehmen</button>
+             <button class="knopf salbei" data-hinzu="${r.id}" ${geaendert ? '' : 'disabled'}>${geaendert ? `Auf ${p} Portionen ändern` : 'Steht auf der Liste'}</button>`
+          : `<button class="knopf terra" data-hinzu="${r.id}">Auf die Einkaufsliste</button>`}
+      </div>`;
+  };
+  let letzterFokus = null;
+  const detailOeffnen = rid => {
+    const da = imKorb(rid);
+    detail = { rid, portionen: da ? da.portionen : REZ[rid].portionen };
+    letzterFokus = document.activeElement;
+    detailZeigen();
+    const b = $('#blatt'), s = $('#schleier');
+    b.hidden = s.hidden = false;
+    requestAnimationFrame(() => { b.classList.add('offen'); s.classList.add('offen'); });
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => $('[data-schliessen]', b)?.focus(), 50);
+  };
+  const detailSchliessen = () => {
+    const b = $('#blatt'), s = $('#schleier');
+    b.classList.remove('offen'); s.classList.remove('offen');
+    document.body.style.overflow = '';
+    setTimeout(() => { b.hidden = s.hidden = true; }, 320);
+    detail = null;
+    letzterFokus?.focus?.();
+  };
+
+  /* ---------------- Einkaufsliste ---------------- */
+  let offenerPosten = null;
+  const postenHTML = p => {
+    const key = 'lm:' + p.id, fertig = !!Z.erledigt[key], offen = offenerPosten === key;
+    const quellen = [...new Set(p.quellen)];
+    return `
+      <div class="posten${fertig ? ' erledigt' : ''}">
+        <div class="posten-zeile">
+          <button class="haken" data-haken="${key}" aria-pressed="${fertig}" aria-label="${esc(p.lm.name)} abhaken">${ICON.haken}</button>
+          <div>
+            <div class="posten-name">${esc(p.lm.name)}</div>
+            <div class="herkunft">
+              ${quellen.map(q => `<span>${esc(q)}</span>`).join('')}
+              ${p.lm.basic ? '<span class="hinweis">hast du wahrscheinlich schon</span>' : ''}
+            </div>
+          </div>
+          <button class="menge${p.angepasst ? ' angepasst' : ''}" data-bearbeiten="${key}" aria-expanded="${offen}" aria-label="Menge ändern: ${mengeText(p.menge, p.lm.einheit)}">${mengeText(p.menge, p.lm.einheit)}</button>
+        </div>
+        <div class="bearbeiten" ${offen ? '' : 'hidden'}>
+          <div class="stepper">
+            <button data-mengeschritt="${p.id}" data-richtung="-1" aria-label="Weniger">−</button>
+            <input data-mengefeld="${p.id}" value="${+p.menge.toFixed(2)}" inputmode="decimal" aria-label="Menge in ${p.lm.einheit}">
+            <button data-mengeschritt="${p.id}" data-richtung="1" aria-label="Mehr">+</button>
+          </div>
+          <span class="einheit">${p.lm.einheit}</span>
+          ${p.angepasst ? `<button class="knopf-text" data-zuruecksetzen="${p.id}">Auf Rezeptmenge</button>` : ''}
+          <button class="loeschen" data-ausblenden="${p.id}">Entfernen</button>
+        </div>
+      </div>`;
+  };
+  const eigenerHTML = e => {
+    const key = 'c:' + e.id, fertig = !!Z.erledigt[key];
+    return `
+      <div class="posten${fertig ? ' erledigt' : ''}">
+        <div class="posten-zeile">
+          <button class="haken" data-haken="${key}" aria-pressed="${fertig}" aria-label="${esc(e.text)} abhaken">${ICON.haken}</button>
+          <div><div class="posten-name">${esc(e.text)}</div></div>
+          <button class="x" data-eigener-weg="${e.id}" aria-label="${esc(e.text)} löschen">${ICON.x}</button>
+        </div>
+      </div>`;
+  };
+
+  const einkaufZeigen = () => {
+    const posten = listenPosten();
+    const normal = posten.filter(p => !p.lm.basic), basics = posten.filter(p => p.lm.basic);
+    const nachGang = {};
+    normal.forEach(p => (nachGang[p.lm.gang] ||= []).push(p));
+    const sortiere = arr => arr.sort((a, b) => (!!Z.erledigt['lm:' + a.id] - !!Z.erledigt['lm:' + b.id]) || a.lm.name.localeCompare(b.lm.name, 'de'));
+
+    let html = '';
+    for (const gang of D.GAENGE) {
+      const arr = nachGang[gang]; if (!arr) continue;
+      const offenAnz = arr.filter(p => !Z.erledigt['lm:' + p.id]).length;
+      html += `<section class="gruppe"><h2 class="gruppe-titel">${esc(gang)} <span>${offenAnz} offen</span></h2><div class="liste">${sortiere(arr).map(postenHTML).join('')}</div></section>`;
+    }
+    if (Z.eigene.length) {
+      const eig = [...Z.eigene].sort((a, b) => !!Z.erledigt['c:' + a.id] - !!Z.erledigt['c:' + b.id]);
+      html += `<section class="gruppe"><h2 class="gruppe-titel">Selbst dazugeschrieben</h2><div class="liste">${eig.map(eigenerHTML).join('')}</div></section>`;
+    }
+    if (basics.length) {
+      html += `<section class="gruppe basics"><h2 class="gruppe-titel">Wahrscheinlich schon zuhause <span>kurz nachschauen</span></h2><div class="liste">${sortiere(basics).map(postenHTML).join('')}</div></section>`;
+    }
+    if (!html) {
+      html = `<div class="leer"><strong>Deine Liste ist leer</strong>Tipp im Rezeptbuch auf das Plus bei einem Gericht oder schreib oben etwas dazu.</div>`;
+    }
+    $('#einkauf-liste').innerHTML = html;
+
+    const alleKeys = [...posten.map(p => 'lm:' + p.id), ...Z.eigene.map(e => 'c:' + e.id)];
+    const erledigt = alleKeys.filter(k => Z.erledigt[k]).length;
+    $('#einkauf-unterzeile').textContent = alleKeys.length
+      ? `${alleKeys.length - erledigt} von ${alleKeys.length} Posten offen. Tipp auf eine Menge, um sie zu ändern.`
+      : 'Hier sammeln sich die Zutaten deiner Gerichte und alles, was du selbst dazuschreibst.';
+    $('#listen-fuss').innerHTML = alleKeys.length ? `
+      ${erledigt ? '<button class="knopf-text" data-aufraeumen>Abgehakte entfernen</button>' : ''}
+      <button class="knopf-text" data-leeren>${leerenBestaetigen ? 'Wirklich alles löschen?' : 'Liste leeren'}</button>` : '';
+
+    // Seitenleiste: gewählte Gerichte + Vorschläge
+    const ids = listenIds();
+    const vorschlaege = Z.gerichte.length ? D.rezepte
+      .filter(r => !imKorb(r.id))
+      .map(r => ({ r, teilt: geteilt(r, ids) }))
+      .filter(v => v.teilt.length)
+      .sort((a, b) => b.teilt.length - a.teilt.length || NW[b.r.id].e - NW[a.r.id].e)
+      .slice(0, 3) : [];
+    $('#seitenleiste').innerHTML = `
+      <div class="panel">
+        <h2>Gerichte auf der Liste</h2>
+        ${Z.gerichte.length ? '<p class="klein">Rausnehmen zieht nur die Mengen dieses Gerichts ab.</p>' + Z.gerichte.map(g => {
+          const r = REZ[g.rid]; if (!r) return '';
+          return `<div class="gericht-zeile">
+            <button class="name" data-oeffnen="${r.id}" style="border:0;background:none;padding:0;text-align:left;cursor:pointer">${esc(r.name)}<small>${g.portionen} Portionen${r.mealPrep ? ', Meal Prep' : ''}</small></button>
+            <button class="x" data-entfernen="${r.id}" aria-label="${esc(r.name)} von der Liste nehmen">${ICON.x}</button>
+          </div>`; }).join('') : '<p class="klein" style="margin:0">Noch keine. Im Rezeptbuch aufs Plus tippen.</p>'}
+      </div>
+      ${merkPanel()}
+      ${vorschlaege.length ? `<div class="panel">
+        <h2>Passt gut dazu</h2>
+        <p class="klein">Diese Gerichte nutzen Zutaten, die du sowieso kaufst. So bleibt weniger übrig.</p>
+        ${vorschlaege.map(v => `<div class="vorschlag">
+          <button class="name" data-oeffnen="${v.r.id}" style="border:0;background:none;padding:0;text-align:left;cursor:pointer">${esc(v.r.name)}<small>Nutzt auch ${esc(v.teilt.join(', '))}</small></button>
+          <button class="plus" data-schnell="${v.r.id}" aria-label="${esc(v.r.name)} auf die Einkaufsliste">${ICON.plus}</button>
+        </div>`).join('')}
+      </div>` : ''}`;
+
+    const offen = alleKeys.length - erledigt;
+    $$('[data-zaehler]').forEach(z => z.textContent = offen || '');
+  };
+  let leerenBestaetigen = false;
+  let merkBearbeiten = false;
+
+  // „Schon mal gebraucht“: alles, was ich mal selbst dazugeschrieben habe,
+  // nach Kategorie sortiert – zum Nachschauen, was diesmal noch fehlt.
+  const merkPanel = () => {
+    if (!Z.merk.length) return '';
+    const drauf = new Set(Z.eigene.map(e => e.text.toLowerCase()));
+    const nachKat = {};
+    Z.merk.forEach(m => (nachKat[m.kat] ||= []).push(m));
+    const gruppen = KATEGORIEN.filter(k => nachKat[k]).map(k => `
+      <p class="merk-kat">${esc(k)}</p>
+      <div class="merk-chips">
+        ${nachKat[k].sort((a, b) => b.zuletzt - a.zuletzt).map(m => {
+          const dabei = drauf.has(m.text.toLowerCase());
+          return merkBearbeiten
+            ? `<button class="merk-chip weg" data-merk-weg="${esc(m.text)}" aria-label="${esc(m.text)} vergessen">${esc(m.text)} ${ICON.x}</button>`
+            : `<button class="merk-chip${dabei ? ' dabei' : ''}" data-merk-dazu="${esc(m.text)}" ${dabei ? 'disabled' : ''}>${dabei ? ICON.haken : ICON.plus}${esc(m.text)}</button>`;
+        }).join('')}
+      </div>`).join('');
+    return `<div class="panel">
+      <div class="panel-kopf">
+        <h2>Schon mal gebraucht</h2>
+        <button class="knopf-text" data-merk-modus>${merkBearbeiten ? 'Fertig' : 'Bearbeiten'}</button>
+      </div>
+      <p class="klein">Alles, was du schon mal selbst dazugeschrieben hast. Zum Nachschauen, ob diesmal was fehlt.</p>
+      ${gruppen}
+    </div>`;
+  };
+
+
+  const mengeSetzen = (id, neu) => {
+    const p = listenPosten().find(x => x.id === id) || null;
+    const basis = p ? p.basis : 0;
+    if (!(neu > 0)) { Z.aus[id] = true; delete Z.delta[id]; offenerPosten = null; sichern(); toast('Posten entfernt'); return; }
+    Z.delta[id] = neu - basis;
+    if (Math.abs(Z.delta[id]) < 1e-9) delete Z.delta[id];
+    sichern();
+  };
+
+  /* ---------------- Lebensmittel ---------------- */
+  const lmFilter = { suche: '', sort: 'gang' };
+  const blacklistPanel = () => `
+    <div class="panel bl">
+      <h2>Mag ich nicht</h2>
+      <p class="klein">Rezepte mit diesen Sachen blendet das Rezeptbuch aus. Beim Eintragen neuer Gerichte halte ich mich auch daran.</p>
+      <div class="merk-chips">
+        ${Z.blacklist.map(b => `<button class="merk-chip weg" data-bl-weg="${esc(b)}" aria-label="${esc(b)} wieder zulassen">${esc(b.charAt(0).toUpperCase() + b.slice(1))} ${ICON.x}</button>`).join('')
+          || '<span class="klein">Noch nichts eingetragen.</span>'}
+      </div>
+      <form class="eingabe klein-eingabe" id="bl-form" autocomplete="off">
+        <label class="sr" for="bl-text">Lebensmittel eintragen, das du nicht magst</label>
+        <input id="bl-text" placeholder="Noch etwas, das du nicht magst" maxlength="40">
+        <button class="knopf" type="submit">Eintragen</button>
+      </form>
+    </div>`;
+
+  const lmZeile = l => {
+    const dichte = l.n.kcal ? l.n.e * 4 / l.n.kcal : 0; // Anteil der Kalorien aus Eiweiß
+    const in_ = D.rezepte.filter(r => r.zutaten.some(([id]) => id === l.id)).map(r => r.name);
+    const stueck = l.einheit !== 'g' && l.einheit !== 'ml' ? `1 ${l.einheit} ≈ ${zahl(l.g, 1)} g` : '';
+    const unter = [stueck, in_.length ? `In ${in_.length} ${in_.length === 1 ? 'Rezept' : 'Rezepten'}` : 'In keinem Rezept'].filter(Boolean).join(', ');
+    const nogo = istNogo(l.name);
+    return `<div class="lm-zeile${nogo ? ' nogo' : ''}" title="${esc(in_.join(', '))}">
+      <div class="lm-name">${esc(l.name)}<small>${esc(unter)}</small></div>
+      <div class="lm-werte">
+        <span>${zahl(l.n.kcal)} kcal</span>
+        <span class="e">${zahl(l.n.e, 1)} g<small> Eiweiß</small></span>
+        <span class="nebenwert">${zahl(l.n.kh, 1)} g KH</span>
+        <span class="nebenwert">${zahl(l.n.f, 1)} g Fett</span>
+        <button class="mag-nicht${nogo ? ' aktiv' : ''}" data-bl-um="${esc(l.name)}" aria-pressed="${nogo}" aria-label="${esc(l.name)} ${nogo ? 'wieder zulassen' : 'mag ich nicht'}" title="${nogo ? 'Wieder zulassen' : 'Mag ich nicht'}">${ICON.daumen}</button>
+      </div>
+      ${l.n.kcal ? `<div class="dichte"><div class="dichte-balken"><i style="width:${Math.min(100, Math.round(dichte * 100))}%"></i></div>${Math.round(dichte * 100)} % der Kalorien aus Eiweiß</div>` : ''}
+    </div>`;
+  };
+  const lmZeigen = () => {
+    const q = lmFilter.suche.trim().toLowerCase();
+    let arr = D.lebensmittel.filter(l => !q || l.name.toLowerCase().includes(q));
+    let html = '';
+    if (lmFilter.sort === 'gang') {
+      for (const gang of D.GAENGE) {
+        const g = arr.filter(l => l.gang === gang).sort((a, b) => a.name.localeCompare(b.name, 'de'));
+        if (g.length) html += `<section class="gruppe"><h2 class="gruppe-titel">${esc(gang)}</h2><div class="lm-tabelle">${g.map(lmZeile).join('')}</div></section>`;
+      }
+    } else {
+      const s = {
+        eiweiss: (a, b) => b.n.e - a.n.e,
+        dichte: (a, b) => (b.n.kcal ? b.n.e / b.n.kcal : 0) - (a.n.kcal ? a.n.e / a.n.kcal : 0),
+        name: (a, b) => a.name.localeCompare(b.name, 'de'),
+      }[lmFilter.sort];
+      arr.sort(s);
+      if (arr.length) html = `<div class="lm-tabelle">${arr.map(lmZeile).join('')}</div>`;
+    }
+    $('#lm-liste').innerHTML = (q ? '' : blacklistPanel()) + (html || `<div class="leer"><strong>Nichts gefunden</strong>Dieses Lebensmittel ist noch nicht eingetragen. Gib Claude Bescheid, dann kommt es dazu.</div>`);
+  };
+
+  /* ---------------- Kochmodus ----------------
+     Schritt für Schritt durch ein Rezept, mit Timer je Schritt und
+     den Zutaten, die genau in diesem Schritt gebraucht werden.
+     Der Bildschirm bleibt dabei an, solange der Browser das erlaubt. */
+  let koch = null;          // { rid, portionen, i }
+  let uhr = null;           // { rest, laeuft }
+  let uhrId = null, wach = null;
+
+  const mmss = sek => Math.floor(sek / 60) + ':' + String(sek % 60).padStart(2, '0');
+
+  // Welche Zutaten des Rezepts kommen in diesem Schritt vor?
+  const zutatenImSchritt = (r, text, f) => r.zutaten
+    .filter(([id]) => {
+      const l = LM[id]; if (!l) return false;
+      const t = text.toLowerCase();
+      return t.includes((l.kw || l.name).toLowerCase()) || t.includes(l.name.toLowerCase());
+    })
+    .map(([id, m]) => ({ l: LM[id], menge: m * f }));
+
+  const zutatenListe = arr => `<ul class="koch-zutaten">${arr.map(z =>
+    `<li class="${z.l.basic ? 'basic' : ''}"><span>${esc(z.l.name)}</span><span>${mengeText(z.menge, z.l.einheit)}</span></li>`).join('')}</ul>`;
+
+  const uhrStoppen = () => { clearInterval(uhrId); uhrId = null; };
+  const uhrTick = () => {
+    if (!uhr || !uhr.laeuft) return;
+    uhr.rest--;
+    if (uhr.rest <= 0) {
+      uhr.rest = 0; uhr.laeuft = false; uhrStoppen();
+      navigator.vibrate?.([220, 120, 220]);
+      toast('Zeit ist um');
+    }
+    kochZeigen();
+  };
+
+  const kochZeigen = () => {
+    const r = REZ[koch.rid], f = koch.portionen / r.portionen, n = r.schritte.length, i = koch.i;
+    const kopf = `
+      <div class="koch-kopf">
+        <div class="wo">
+          <strong>${esc(r.name)}</strong>
+          <span>${i === 0 ? 'Vorbereitung' : i > n ? 'Fertig' : `Schritt ${i} von ${n}`} · ${koch.portionen} Portionen</span>
+        </div>
+        <button class="x" data-koch-aus aria-label="Kochmodus beenden">${ICON.x}</button>
+      </div>
+      <div class="fortschritt"><i style="width:${Math.round(i / (n + 1) * 100)}%"></i></div>`;
+
+    let inhalt, fuss;
+    if (i === 0) {
+      inhalt = `
+        <h2 class="koch-titel">Alles bereitstellen</h2>
+        <p class="koch-text">Das brauchst du für ${koch.portionen} Portionen. Die Mengen sind schon hochgerechnet.</p>
+        ${zutatenListe(r.zutaten.map(([id, m]) => ({ l: LM[id], menge: m * f })).filter(z => z.l))}`;
+      fuss = `<button class="knopf terra" data-koch-weiter>Los geht's</button>`;
+    } else if (i > n) {
+      inhalt = `
+        <div class="fertig-text">
+          <div class="gross" aria-hidden="true">🍽️</div>
+          <h2 class="koch-titel" style="margin-top:14px">Fertig</h2>
+          <p class="koch-text" style="margin:0 auto">${r.mealPrep
+            ? `Hält ${r.haltbar} ${r.haltbar === 1 ? 'Tag' : 'Tage'} im Kühlschrank. ${koch.portionen} Portionen, also ${koch.portionen} Dosen.`
+            : 'Am besten gleich essen.'}</p>
+        </div>`;
+      fuss = `<button class="knopf zweit" data-koch-zurueck>Zurück</button><button class="knopf salbei" data-koch-aus>Schließen</button>`;
+    } else {
+      const sch = r.schritte[i - 1];
+      const text = typeof sch === 'string' ? sch : sch.text;
+      const titel = typeof sch === 'string' ? `Schritt ${i}` : sch.t;
+      const zu = zutatenImSchritt(r, text, f);
+      inhalt = `
+        <h2 class="koch-titel">${esc(titel)}</h2>
+        <p class="koch-text">${esc(text)}</p>
+        ${zu.length ? `<p class="dafuer">Dafür:</p>${zutatenListe(zu)}` : ''}
+        ${uhr ? `
+          <div class="timer-kasten${uhr.rest === 0 ? ' aus' : ''}">
+            <div class="timer-zahl">${mmss(uhr.rest)}</div>
+            ${uhr.rest === 0
+              ? `<button class="knopf salbei" data-uhr="neu">Nochmal</button>`
+              : `<button class="knopf ${uhr.laeuft ? 'zweit' : 'terra'}" data-uhr="${uhr.laeuft ? 'pause' : 'start'}">${uhr.laeuft ? 'Pause' : 'Timer starten'}</button>`}
+          </div>` : ''}`;
+      fuss = `<button class="knopf zweit" data-koch-zurueck>Zurück</button>
+              <button class="knopf terra" data-koch-weiter>${i === n ? 'Fertig' : 'Weiter'}</button>`;
+    }
+    $('#koch').innerHTML = `${kopf}<div class="koch-inhalt">${inhalt}</div><div class="koch-fuss">${fuss}</div>`;
+  };
+
+  const uhrFuerSchritt = () => {
+    uhrStoppen();
+    const r = REZ[koch.rid], sch = r.schritte[koch.i - 1];
+    uhr = sch && typeof sch === 'object' && sch.timer ? { rest: sch.timer, laeuft: false } : null;
+  };
+
+  const kochOeffnen = (rid, portionen) => {
+    koch = { rid, portionen, i: 0 };
+    uhr = null; uhrStoppen();
+    $('#koch').hidden = false;
+    document.body.style.overflow = 'hidden';
+    kochZeigen();
+    navigator.wakeLock?.request('screen').then(w => wach = w).catch(() => {});
+  };
+  const kochSchliessen = () => {
+    uhrStoppen(); uhr = null; koch = null;
+    $('#koch').hidden = true;
+    document.body.style.overflow = detail ? 'hidden' : '';
+    wach?.release?.().catch(() => {}); wach = null;
+  };
+  const kochGehen = richtung => {
+    const n = REZ[koch.rid].schritte.length;
+    const neu = koch.i + richtung;
+    if (neu < 0) return kochSchliessen();
+    koch.i = Math.min(n + 1, neu);
+    uhrFuerSchritt();
+    kochZeigen();
+    $('#koch').querySelector('.koch-inhalt').scrollTop = 0;
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && koch && !wach) navigator.wakeLock?.request('screen').then(w => wach = w).catch(() => {});
+  });
+
+  /* ---------------- Navigation ---------------- */
+  const REITER = ['rezepte', 'einkauf', 'lebensmittel'];
+  const navigieren = () => {
+    const ziel = REITER.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'rezepte';
+    REITER.forEach(r => { $('#ansicht-' + r).hidden = r !== ziel; });
+    $$('[data-reiter]').forEach(a => { if (a.dataset.reiter === ziel) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    window.scrollTo(0, 0);
+  };
+
+  const alles = () => {
+    rezepteZeigen(); einkaufZeigen(); lmZeigen();
+    if (detail) detailZeigen();
+  };
+
+  /* ---------------- Ereignisse ---------------- */
+  document.addEventListener('click', e => {
+    const t = e.target.closest('button, [data-oeffnen]');
+    if (!t) { if (e.target.id === 'schleier') detailSchliessen(); return; }
+    const d = t.dataset;
+
+    if (d.leeren === undefined && leerenBestaetigen) { leerenBestaetigen = false; }
+
+    if (d.kochen) { const p = detail ? detail.portionen : REZ[d.kochen].portionen; detailSchliessen(); return kochOeffnen(d.kochen, p); }
+    if (t.hasAttribute('data-koch-aus')) return kochSchliessen();
+    if (t.hasAttribute('data-koch-weiter')) return kochGehen(1);
+    if (t.hasAttribute('data-koch-zurueck')) return kochGehen(-1);
+    if (d.uhr) {
+      if (d.uhr === 'neu') { uhrFuerSchritt(); uhr && (uhr.laeuft = true); }
+      else uhr.laeuft = d.uhr === 'start';
+      uhrStoppen();
+      if (uhr && uhr.laeuft) uhrId = setInterval(uhrTick, 1000);
+      return kochZeigen();
+    }
+    if (d.merkDazu) {
+      Z.eigene.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text: d.merkDazu });
+      merken(d.merkDazu); sichern(); return toast(`Auf der Liste: ${d.merkDazu}`);
+    }
+    if (d.merkWeg) { Z.merk = Z.merk.filter(m => m.text !== d.merkWeg); return sichern(); }
+    if (t.hasAttribute('data-merk-modus')) { merkBearbeiten = !merkBearbeiten; return einkaufZeigen(); }
+    if (d.blWeg) { Z.blacklist = Z.blacklist.filter(b => b !== d.blWeg); return sichern(); }
+    if (d.blUm) {
+      const n = d.blUm.toLowerCase();
+      if (istNogo(d.blUm)) Z.blacklist = Z.blacklist.filter(b => !n.includes(b));
+      else Z.blacklist.push(n);
+      sichern(); return toast(istNogo(d.blUm) ? `${d.blUm} steht jetzt auf „Mag ich nicht"` : `${d.blUm} ist wieder erlaubt`);
+    }
+    if (d.oeffnen) return detailOeffnen(d.oeffnen);
+    if (d.schnell) {
+      if (imKorb(d.schnell)) return gerichtEntfernen(d.schnell);
+      return gerichtSetzen(d.schnell, REZ[d.schnell].portionen);
+    }
+    if (t.hasAttribute('data-schliessen')) return detailSchliessen();
+    if (d.port && detail) {
+      detail.portionen = Math.max(1, Math.min(20, detail.portionen + +d.port));
+      return detailZeigen();
+    }
+    if (d.hinzu) { gerichtSetzen(d.hinzu, detail ? detail.portionen : REZ[d.hinzu].portionen); return; }
+    if (d.entfernen) { gerichtEntfernen(d.entfernen); if (detail) detailSchliessen(); return; }
+    if (d.filter) {
+      filter[d.filter] = !filter[d.filter];
+      t.setAttribute('aria-pressed', filter[d.filter]);
+      return rezepteZeigen();
+    }
+    if (d.haken) {
+      if (Z.erledigt[d.haken]) delete Z.erledigt[d.haken]; else Z.erledigt[d.haken] = true;
+      return sichern();
+    }
+    if (d.bearbeiten) { offenerPosten = offenerPosten === d.bearbeiten ? null : d.bearbeiten; return einkaufZeigen(); }
+    if (d.mengeschritt) {
+      const p = listenPosten().find(x => x.id === d.mengeschritt); if (!p) return;
+      const sch = schritt(p.lm.einheit, p.menge);
+      let neu = d.richtung === '1' ? Math.floor(p.menge / sch + 1e-9) * sch + sch : Math.ceil(p.menge / sch - 1e-9) * sch - sch;
+      return mengeSetzen(p.id, +neu.toFixed(2));
+    }
+    if (d.zuruecksetzen) { delete Z.delta[d.zuruecksetzen]; return sichern(); }
+    if (d.ausblenden) { Z.aus[d.ausblenden] = true; delete Z.delta[d.ausblenden]; offenerPosten = null; sichern(); return toast('Posten entfernt'); }
+    if (d.eigenerWeg) { Z.eigene = Z.eigene.filter(x => x.id !== d.eigenerWeg); delete Z.erledigt['c:' + d.eigenerWeg]; return sichern(); }
+    if (t.hasAttribute('data-aufraeumen')) {
+      for (const k of Object.keys(Z.erledigt)) {
+        if (k.startsWith('lm:')) Z.aus[k.slice(3)] = true;
+        else Z.eigene = Z.eigene.filter(x => 'c:' + x.id !== k);
+      }
+      Z.erledigt = {};
+      sichern(); return toast('Abgehakte entfernt');
+    }
+    if (t.hasAttribute('data-leeren')) {
+      if (!leerenBestaetigen) { leerenBestaetigen = true; return einkaufZeigen(); }
+      leerenBestaetigen = false; Z = leererZustand(); sichern(); return toast('Liste geleert');
+    }
+  });
+
+  document.addEventListener('change', e => {
+    const t = e.target;
+    if (t.id === 'sortierung') { filter.sort = t.value; rezepteZeigen(); }
+    if (t.id === 'lm-sortierung') { lmFilter.sort = t.value; lmZeigen(); }
+    if (t.dataset.mengefeld) mengeSetzen(t.dataset.mengefeld, parseFloat(t.value.replace(',', '.')));
+    if (t.id === 'port-feld' && detail) { const v = parseInt(t.value, 10); detail.portionen = Math.max(1, Math.min(20, v || 1)); detailZeigen(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && koch) return kochSchliessen();
+    if (e.key === 'Escape' && detail) detailSchliessen();
+    if (e.key === 'Enter' && e.target.dataset && e.target.dataset.mengefeld) e.target.blur();
+  });
+  $('#rezept-suche').addEventListener('input', e => { filter.suche = e.target.value; rezepteZeigen(); });
+  $('#lm-suche').addEventListener('input', e => { lmFilter.suche = e.target.value; lmZeigen(); });
+  $('#eigener-posten').addEventListener('submit', e => {
+    e.preventDefault();
+    const feld = $('#eigener-text'), text = feld.value.trim(); if (!text) return;
+    Z.eigene.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text });
+    merken(text);
+    feld.value = ''; sichern();
+  });
+  document.addEventListener('submit', e => {
+    if (e.target.id !== 'bl-form') return;
+    e.preventDefault();
+    const feld = $('#bl-text'), wort = feld.value.trim().toLowerCase();
+    if (!wort || Z.blacklist.includes(wort)) { feld.value = ''; return; }
+    Z.blacklist.push(wort); feld.value = ''; sichern();
+  });
+  $('#schleier').addEventListener('click', detailSchliessen);
+  window.addEventListener('scroll', () => $('#kopf').classList.toggle('gescrollt', scrollY > 4), { passive: true });
+  window.addEventListener('hashchange', navigieren);
+
+  navigieren();
+  alles();
+})();
+</script>
+</body>
+</html>

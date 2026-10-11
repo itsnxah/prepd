@@ -1,0 +1,3 @@
+Hier kommen die Fotos deiner Gerichte rein.
+Dateiname frei waehlbar, danach in data.js beim Rezept als  bild: "bilder/dateiname.jpg"  eintragen.
+Querformat (4:3) passt am besten.
