@@ -50,6 +50,7 @@ window.PREPD = {
     { id: 'frischkaese', name: 'Frischkäse light',    gang: 'Kühlregal', einheit: 'g',   g: 1,  n: { kcal: 115, e: 8.5,  kh: 5,   f: 6.5 }, kw: 'Frischkäse' },
     { id: 'cheddar-light', name: 'Cheddar-Scheiben light', gang: 'Kühlregal', einheit: 'Scheibe', g: 20, n: { kcal: 280, e: 29, kh: 0.5, f: 18 }, kw: 'Cheddar' },
     { id: 'joghurt-griechisch', name: 'Griechischer Joghurt (fettarm)', gang: 'Kühlregal', einheit: 'g', g: 1, n: { kcal: 65, e: 9.5, kh: 4, f: 1.5 }, kw: 'Joghurt' },
+    { id: 'parmesan',   name: 'Parmesan',             gang: 'Kühlregal', einheit: 'g',   g: 1,  n: { kcal: 400, e: 36,   kh: 0,   f: 28 }, kw: 'Parmesan' },
     { id: 'skyr',       name: 'Skyr natur',           gang: 'Kühlregal', einheit: 'g',   g: 1,  n: { kcal: 63,  e: 11,   kh: 4,   f: 0.2 }, kw: 'Skyr' },
 
     // Obst & Gemüse
@@ -71,6 +72,8 @@ window.PREPD = {
     { id: 'mais',       name: 'Mais',                 gang: 'Konserven & Vorrat', einheit: 'Dose', g: 140, n: { kcal: 80,  e: 3,  kh: 14, f: 1.2 }, kw: 'Mais' },
     { id: 'tomaten-mediterran', name: 'Gehackte Tomaten mediterran', gang: 'Konserven & Vorrat', einheit: 'Dose', g: 400, n: { kcal: 28, e: 1.2, kh: 4.2, f: 0.4 }, kw: 'Gehackte Tomaten' },
     { id: 'tomaten-gehackt', name: 'Gehackte Tomaten (Dose)', gang: 'Konserven & Vorrat', einheit: 'Dose', g: 400, n: { kcal: 24, e: 1.2, kh: 4, f: 0.2 }, kw: 'gehackte Tomaten' },
+    { id: 'tomaten-getrocknet', name: 'Getrocknete Tomaten', gang: 'Konserven & Vorrat', einheit: 'g', g: 1, n: { kcal: 260, e: 14, kh: 38, f: 3 }, kw: 'getrocknete Tomaten' },
+    { id: 'huehnerbruehe', name: 'Hühnerbrühe',      gang: 'Konserven & Vorrat', einheit: 'ml',   g: 1,   n: { kcal: 3,   e: 0.3, kh: 0.3, f: 0.1 }, kw: 'Brühe' },
     { id: 'tomatenmark', name: 'Tomatenmark',          gang: 'Konserven & Vorrat', einheit: 'EL',   g: 15,  n: { kcal: 82,  e: 4.3, kh: 13, f: 0.5 }, kw: 'Tomatenmark' },
     { id: 'gewuerzgurken', name: 'Gewürzgurken (Glas)', gang: 'Konserven & Vorrat', einheit: 'Stk', g: 30, n: { kcal: 20, e: 0.5, kh: 3, f: 0.1 }, kw: 'Gewürzgurken' },
     { id: 'sesam',      name: 'Sesam',                gang: 'Konserven & Vorrat', einheit: 'EL',   g: 8,   n: { kcal: 580, e: 18, kh: 10, f: 50 }, kw: 'Sesam' },
@@ -93,6 +96,7 @@ window.PREPD = {
     { id: 'kreuzkuemmel', name: 'Kreuzkümmel',        gang: 'Gewürze & Öl', einheit: 'TL', g: 2,   n: { kcal: 375, e: 18, kh: 34, f: 22 },  basic: true },
     { id: 'haehnchengewuerz', name: 'Hähnchengewürz', gang: 'Gewürze & Öl', einheit: 'TL', g: 3, n: { kcal: 230, e: 8, kh: 35, f: 5 }, kw: 'Hähnchengewürz', basic: true },
     { id: 'hackgewuerz', name: 'Hackfleischgewürz',    gang: 'Gewürze & Öl', einheit: 'TL', g: 3,   n: { kcal: 230, e: 8,  kh: 35, f: 5 },   basic: true },
+    { id: 'italienische-kraeuter', name: 'Italienische Kräuter', gang: 'Gewürze & Öl', einheit: 'TL', g: 1.5, n: { kcal: 270, e: 12, kh: 40, f: 6 }, kw: 'italienischen Kräutern', basic: true },
     { id: 'kraeuter',   name: 'TK-Kräuter',           gang: 'Gewürze & Öl', einheit: 'EL', g: 5,   n: { kcal: 40,  e: 3,  kh: 4,  f: 1 },   basic: true },
   ],
 
@@ -211,6 +215,30 @@ window.PREPD = {
         { t: 'Anrichten', text: 'Mit dem Reis anrichten oder direkt in Dosen aufteilen.' },
       ],
       notiz: 'Mengen geschätzt: 500 g Hähnchen für 2 Portionen. Fettarmen griechischen Joghurt nehmen (statt 10 %), das spart rund 200 kcal pro Portion und flockt weniger aus. Reis zum Mitnehmen getrennt abfüllen.',
+    },
+    {
+      id: 'marry-me-chicken',
+      bild: 'bilder/marry-me-chicken.jpg',
+      name: 'Marry-me-Chicken mit Reis',
+      portionen: 1, zeit: 30, mealPrep: true, haltbar: 3,
+      tiktok: 'https://www.tiktok.com/@noah.gloeckler/video/7647209213982182688',
+      zutaten: [
+        ['haehnchen', 200], ['reis', 40], ['zwiebel', 0.25], ['knoblauch', 0.75], ['tomaten-getrocknet', 12.5],
+        ['tomatenmark', 0.25], ['huehnerbruehe', 50], ['frischkaese', 50], ['parmesan', 7.5],
+        ['rapsoel', 0.5], ['salz', 0.5], ['pfeffer', 0.25], ['knoblauchpulver', 0.5], ['paprikapulver', 0.5],
+        ['italienische-kraeuter', 0.5],
+      ],
+      schritte: [
+        { t: 'Hähnchen würzen', text: 'Hähnchenbrust in mundgerechte Stücke schneiden und mit Salz, Pfeffer, Knoblauchpulver und Paprikapulver würzen. Alles gut vermengen.' },
+        { t: 'Hähnchen anbraten', timer: 480, text: 'Rapsöl in einer Pfanne erhitzen und das Hähnchen darin goldbraun anbraten. Danach herausnehmen und beiseitestellen.' },
+        { t: 'Reis kochen', timer: 720, text: 'Reis waschen, mit der doppelten Menge Wasser und einer Prise Salz aufsetzen und 12 Minuten kochen. Das geht parallel zur Sauce.' },
+        { t: 'Sauce anrösten', timer: 180, text: 'In derselben Pfanne die gehackte Zwiebel, den gepressten Knoblauch, die getrockneten Tomaten und das Tomatenmark kurz anrösten.' },
+        { t: 'Ablöschen', timer: 120, text: 'Mit der Hühnerbrühe ablöschen, den Frischkäse unterrühren und mit italienischen Kräutern würzen.' },
+        { t: 'Cremig rühren', timer: 120, text: 'Parmesan dazugeben und rühren, bis eine cremige Sauce entsteht. Mit Salz und Pfeffer abschmecken.' },
+        { t: 'Zusammenführen', text: 'Das Hähnchen zurück in die Pfanne geben und alles gut vermengen.' },
+        { t: 'Anrichten', text: 'Mit dem Reis anrichten oder in Dosen aufteilen. Wer mag, gibt etwas Petersilie und Parmesan obendrauf.' },
+      ],
+      notiz: 'Nach einem TikTok-Rezept, das im Video für 4 Meal-Prep-Portionen gedacht ist (800 g Hähnchen). Hier auf 1 Portion gerechnet: für das Vorkochen einfach oben auf 4 Personen hochstellen. Reis von 50 auf 40 g pro Portion reduziert. Mengen von getrockneten Tomaten, Gewürzen und Öl geschätzt, rote Zwiebel nehmen. Reis zum Mitnehmen getrennt abfüllen.',
     },
   ],
 };
