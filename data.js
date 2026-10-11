@@ -165,5 +165,23 @@ window.PREPD = {
         { t: 'Sauce binden', timer: 180, text: 'Frischkäse mit 100 ml Wasser einrühren, Pute zurück in die Pfanne, mit Kräutern abschmecken.' },
       ],
     },
+    {
+      id: 'lachs-bowl',
+      name: 'Lachs-Bowl mit Gurke und Mais',
+      portionen: 2, zeit: 25, mealPrep: true, haltbar: 2,
+      zutaten: [
+        ['lachs', 300], ['reis', 80], ['gurke', 0.5], ['mais', 1],
+        ['tomaten', 150], ['skyr', 200], ['senf', 1], ['honig', 1],
+        ['olivenoel', 1], ['paprikapulver', 0.5], ['salz', 1], ['pfeffer', 0.5],
+      ],
+      schritte: [
+        { t: 'Reis kochen', timer: 720, text: 'Reis nach Packung kochen, abtropfen und abkühlen lassen.' },
+        { t: 'Lachs backen', timer: 900, text: 'Ofen auf 200 °C vorheizen. Lachs mit Öl, Paprikapulver, Salz und Pfeffer einreiben und 15 Minuten backen, dann abkühlen lassen.' },
+        { t: 'Sauce rühren', text: 'Skyr mit Senf, Honig, Salz und Pfeffer glatt rühren und kaltstellen.' },
+        { t: 'Gemüse schneiden', text: 'Gurke würfeln, Tomaten halbieren und den Mais abtropfen lassen.' },
+        { t: 'Anrichten', text: 'Lachs in grobe Stücke zupfen. Reis auf zwei Schüsseln verteilen, Lachs, Gurke, Tomaten und Mais darauf geben und mit der Sauce toppen.' },
+      ],
+      notiz: 'Für Meal Prep Reis, Lachs, Gemüse und Sauce getrennt abfüllen und erst am Platz mischen. Kalt essen, am besten innerhalb von 2 Tagen. Gurke erst kurz vorher dazugeben, dann bleibt sie knackig.',
+    },
   ],
 };
