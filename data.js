@@ -48,6 +48,7 @@ window.PREPD = {
     { id: 'huettenkaese', name: 'Hüttenkäse',         gang: 'Kühlregal', einheit: 'g',   g: 1,  n: { kcal: 98,  e: 12.3, kh: 2.6, f: 4.3 }, kw: 'Hüttenkäse' },
     { id: 'frischkaese', name: 'Frischkäse light',    gang: 'Kühlregal', einheit: 'g',   g: 1,  n: { kcal: 115, e: 8.5,  kh: 5,   f: 6.5 }, kw: 'Frischkäse' },
     { id: 'cheddar-light', name: 'Cheddar-Scheiben light', gang: 'Kühlregal', einheit: 'Scheibe', g: 20, n: { kcal: 280, e: 29, kh: 0.5, f: 18 }, kw: 'Cheddar' },
+    { id: 'joghurt-griechisch', name: 'Griechischer Joghurt (fettarm)', gang: 'Kühlregal', einheit: 'g', g: 1, n: { kcal: 65, e: 9.5, kh: 4, f: 1.5 }, kw: 'Joghurt' },
     { id: 'skyr',       name: 'Skyr natur',           gang: 'Kühlregal', einheit: 'g',   g: 1,  n: { kcal: 63,  e: 11,   kh: 4,   f: 0.2 }, kw: 'Skyr' },
 
     // Obst & Gemüse
@@ -68,6 +69,7 @@ window.PREPD = {
     { id: 'kidney',     name: 'Kidneybohnen',         gang: 'Konserven & Vorrat', einheit: 'Dose', g: 250, n: { kcal: 100, e: 7,  kh: 13, f: 0.5 }, kw: 'Bohnen' },
     { id: 'mais',       name: 'Mais',                 gang: 'Konserven & Vorrat', einheit: 'Dose', g: 140, n: { kcal: 80,  e: 3,  kh: 14, f: 1.2 }, kw: 'Mais' },
     { id: 'tomaten-mediterran', name: 'Gehackte Tomaten mediterran', gang: 'Konserven & Vorrat', einheit: 'Dose', g: 400, n: { kcal: 28, e: 1.2, kh: 4.2, f: 0.4 }, kw: 'Gehackte Tomaten' },
+    { id: 'tomaten-gehackt', name: 'Gehackte Tomaten (Dose)', gang: 'Konserven & Vorrat', einheit: 'Dose', g: 400, n: { kcal: 24, e: 1.2, kh: 4, f: 0.2 }, kw: 'gehackte Tomaten' },
     { id: 'tomatenmark', name: 'Tomatenmark',          gang: 'Konserven & Vorrat', einheit: 'EL',   g: 15,  n: { kcal: 82,  e: 4.3, kh: 13, f: 0.5 }, kw: 'Tomatenmark' },
     { id: 'gewuerzgurken', name: 'Gewürzgurken (Glas)', gang: 'Konserven & Vorrat', einheit: 'Stk', g: 30, n: { kcal: 20, e: 0.5, kh: 3, f: 0.1 }, kw: 'Gewürzgurken' },
     { id: 'sesam',      name: 'Sesam',                gang: 'Konserven & Vorrat', einheit: 'EL',   g: 8,   n: { kcal: 580, e: 18, kh: 10, f: 50 }, kw: 'Sesam' },
@@ -88,6 +90,7 @@ window.PREPD = {
     { id: 'paprikapulver', name: 'Paprikapulver',     gang: 'Gewürze & Öl', einheit: 'TL', g: 2.5, n: { kcal: 290, e: 14, kh: 19, f: 13 },  basic: true },
     { id: 'curry',      name: 'Currypulver',          gang: 'Gewürze & Öl', einheit: 'TL', g: 2.5, n: { kcal: 325, e: 14, kh: 25, f: 14 },  basic: true },
     { id: 'kreuzkuemmel', name: 'Kreuzkümmel',        gang: 'Gewürze & Öl', einheit: 'TL', g: 2,   n: { kcal: 375, e: 18, kh: 34, f: 22 },  basic: true },
+    { id: 'haehnchengewuerz', name: 'Hähnchengewürz', gang: 'Gewürze & Öl', einheit: 'TL', g: 3, n: { kcal: 230, e: 8, kh: 35, f: 5 }, kw: 'Hähnchengewürz', basic: true },
     { id: 'hackgewuerz', name: 'Hackfleischgewürz',    gang: 'Gewürze & Öl', einheit: 'TL', g: 3,   n: { kcal: 230, e: 8,  kh: 35, f: 5 },   basic: true },
     { id: 'kraeuter',   name: 'TK-Kräuter',           gang: 'Gewürze & Öl', einheit: 'EL', g: 5,   n: { kcal: 40,  e: 3,  kh: 4,  f: 1 },   basic: true },
   ],
@@ -183,6 +186,27 @@ window.PREPD = {
         { t: 'Anrichten', text: 'Lachs in grobe Stücke zupfen. Reis auf zwei Schüsseln verteilen, Lachs, Gurke, Tomaten und Mais darauf geben und mit der Sauce toppen.' },
       ],
       notiz: 'Für Meal Prep Reis, Lachs, Gemüse und Sauce getrennt abfüllen und erst am Platz mischen. Kalt essen, am besten innerhalb von 2 Tagen. Gurke erst kurz vorher dazugeben, dann bleibt sie knackig.',
+    },
+    {
+      id: 'joghurt-haehnchen-pfanne',
+      bild: 'bilder/joghurt-haehnchen-pfanne.jpg',
+      name: 'Joghurt-Hähnchen-Pfanne mit Paprika und Reis',
+      portionen: 2, zeit: 30, mealPrep: true, haltbar: 3,
+      zutaten: [
+        ['haehnchen', 500], ['joghurt-griechisch', 400], ['paprika', 2], ['tomaten-gehackt', 1],
+        ['reis', 80], ['rapsoel', 1], ['paprikapulver', 2], ['haehnchengewuerz', 2],
+        ['salz', 1.5], ['pfeffer', 0.5],
+      ],
+      schritte: [
+        { t: 'Reis kochen', timer: 720, text: 'Reis nach Packung kochen, nebenbei den Rest vorbereiten.' },
+        { t: 'Hähnchen marinieren', timer: 600, text: 'Hähnchenbrust in eine große Schüssel geben, 200 g Joghurt, Paprikapulver, Hähnchengewürz und Salz dazu, gut durchmengen und mindestens 10 Minuten marinieren.' },
+        { t: 'Hähnchen braten', timer: 600, text: 'Das Hähnchen in einer Pfanne mit etwas Rapsöl von beiden Seiten durchbraten, dann zurück in die Schüssel geben und grob zerteilen.' },
+        { t: 'Paprika rösten', timer: 300, text: 'Paprika in Stücke schneiden und in derselben Pfanne anrösten.' },
+        { t: 'Sauce ansetzen', text: 'Gehackte Tomaten und die restlichen 200 g Joghurt zur Paprika geben und kräftig mit Salz, Pfeffer und Paprikapulver würzen. Die Hitze etwas herunterschalten, damit der Joghurt nicht ausflockt.' },
+        { t: 'Zusammen köcheln', timer: 210, text: 'Das Hähnchen zurück in die Pfanne geben und 3 bis 4 Minuten köcheln lassen.' },
+        { t: 'Anrichten', text: 'Mit dem Reis anrichten oder direkt in Dosen aufteilen.' },
+      ],
+      notiz: 'Mengen geschätzt: 500 g Hähnchen für 2 Portionen. Fettarmen griechischen Joghurt nehmen (statt 10 %), das spart rund 200 kcal pro Portion und flockt weniger aus. Reis zum Mitnehmen getrennt abfüllen.',
     },
   ],
 };
