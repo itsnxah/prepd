@@ -93,7 +93,7 @@
     background: color-mix(in srgb, var(--papier) 92%, transparent);
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--linie);
-    display: grid; grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(4, 1fr);
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
   }
   .reiter-unten a {
@@ -333,6 +333,10 @@
   .panel-kopf { display: flex; align-items: baseline; gap: 12px; }
   .panel-kopf h2 { flex: 1; margin: 0; }
   .panel-kopf .knopf-text { padding: 0; flex: none; }
+  .merk-seite { max-width: 720px; }
+  .merk-gruppe { margin-bottom: 14px; }
+  .merk-gruppe h2 { margin: 0 0 10px; }
+  .merk-kopf { display: flex; align-items: center; justify-content: space-between; margin: 0 0 12px; }
   .merk-kat { font-size: 12.5px; font-weight: 650; color: var(--tinte-3); margin: 14px 0 7px; }
   .merk-kat:first-of-type { margin-top: 10px; }
   .merk-chips { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -434,6 +438,7 @@
     <nav class="reiter-oben" aria-label="Bereiche">
       <a href="#rezepte" data-reiter="rezepte">Rezepte</a>
       <a href="#einkauf" data-reiter="einkauf">Einkaufsliste <span class="zaehler" data-zaehler></span></a>
+      <a href="#merkliste" data-reiter="merkliste">Merkliste</a>
       <a href="#lebensmittel" data-reiter="lebensmittel">Lebensmittel</a>
     </nav>
     <div class="konto-wrap" id="konto" hidden>
@@ -508,6 +513,13 @@
     </div>
   </section>
 
+  <!-- MERKLISTE -->
+  <section class="ansicht" id="ansicht-merkliste" aria-labelledby="t-merk" hidden>
+    <h1 id="t-merk">Merkliste</h1>
+    <p class="unterzeile">Alles, was du schon mal selbst auf die Einkaufsliste geschrieben hast, nach Bereichen sortiert. Tipp auf einen Eintrag, dann landet er wieder auf der Liste.</p>
+    <div class="merk-seite" id="merk-seite"></div>
+  </section>
+
   <!-- LEBENSMITTEL -->
   <section class="ansicht" id="ansicht-lebensmittel" aria-labelledby="t-lm" hidden>
     <h1 id="t-lm">Lebensmittel</h1>
@@ -541,6 +553,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h2l2 11h10l2-8H7"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="16.5" cy="19.5" r="1.3"/></svg>
     Einkauf
     <span class="zaehler" data-zaehler></span>
+  </a>
+  <a href="#merkliste" data-reiter="merkliste">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10a1 1 0 0 1 1 1v15l-6-3.5L6 20V5a1 1 0 0 1 1-1z"/><path d="M9.5 9h5"/></svg>
+    Merkliste
   </a>
   <a href="#lebensmittel" data-reiter="lebensmittel">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c-3-3-8-1-8 4 0 5 4 9 6 9 1 0 1.3-.6 2-.6s1 .6 2 .6c2 0 6-4 6-9 0-5-5-7-8-4z"/><path d="M12 7c0-2 1-3.5 3-4"/></svg>
@@ -1148,7 +1164,6 @@
             <button class="x" data-entfernen="${r.id}" aria-label="${esc(r.name)} von der Liste nehmen">${ICON.x}</button>
           </div>`; }).join('') : '<p class="klein" style="margin:0">Noch keine. Im Rezeptbuch aufs Plus tippen.</p>'}
       </div>
-      ${merkPanel()}
       ${vorschlaege.length ? `<div class="panel">
         <h2>Passt gut dazu</h2>
         <p class="klein">Diese Gerichte nutzen Zutaten, die du sowieso kaufst. So bleibt weniger übrig.</p>
@@ -1166,29 +1181,31 @@
 
   // „Schon mal gebraucht“: alles, was ich mal selbst dazugeschrieben habe,
   // nach Kategorie sortiert – zum Nachschauen, was diesmal noch fehlt.
-  const merkPanel = () => {
-    if (!Z.merk.length) return '';
+  const merkZeigen = () => {
+    const ziel = $('#merk-seite');
+    if (!Z.merk.length) {
+      ziel.innerHTML = '<div class="panel"><p class="klein" style="margin:0">Noch leer. Sobald du auf der Einkaufsliste etwas Eigenes dazuschreibst (Klopapier, Getränke …), merkt sich die App den Posten hier und sortiert ihn ein.</p></div>';
+      return;
+    }
     const drauf = new Set(Z.eigene.map(e => e.text.toLowerCase()));
     const nachKat = {};
     Z.merk.forEach(m => (nachKat[m.kat] ||= []).push(m));
     const gruppen = KATEGORIEN.filter(k => nachKat[k]).map(k => `
-      <p class="merk-kat">${esc(k)}</p>
-      <div class="merk-chips">
-        ${nachKat[k].sort((a, b) => b.zuletzt - a.zuletzt).map(m => {
-          const dabei = drauf.has(m.text.toLowerCase());
-          return merkBearbeiten
-            ? `<button class="merk-chip weg" data-merk-weg="${esc(m.text)}" aria-label="${esc(m.text)} vergessen">${esc(m.text)} ${ICON.x}</button>`
-            : `<button class="merk-chip${dabei ? ' dabei' : ''}" data-merk-dazu="${esc(m.text)}" ${dabei ? 'disabled' : ''}>${dabei ? ICON.haken : ICON.plus}${esc(m.text)}</button>`;
-        }).join('')}
+      <div class="panel merk-gruppe">
+        <h2>${esc(k)}</h2>
+        <div class="merk-chips">
+          ${nachKat[k].sort((a, b) => b.zuletzt - a.zuletzt).map(m => {
+            const dabei = drauf.has(m.text.toLowerCase());
+            return merkBearbeiten
+              ? `<button class="merk-chip weg" data-merk-weg="${esc(m.text)}" aria-label="${esc(m.text)} vergessen">${esc(m.text)} ${ICON.x}</button>`
+              : `<button class="merk-chip${dabei ? ' dabei' : ''}" data-merk-dazu="${esc(m.text)}" ${dabei ? 'disabled' : ''}>${dabei ? ICON.haken : ICON.plus}${esc(m.text)}</button>`;
+          }).join('')}
+        </div>
       </div>`).join('');
-    return `<div class="panel">
-      <div class="panel-kopf">
-        <h2>Schon mal gebraucht</h2>
+    ziel.innerHTML = `<div class="merk-kopf">
+        <span class="klein">${Z.merk.length} Einträge${merkBearbeiten ? ' – tippe einen an, um ihn zu vergessen' : ''}</span>
         <button class="knopf-text" data-merk-modus>${merkBearbeiten ? 'Fertig' : 'Bearbeiten'}</button>
-      </div>
-      <p class="klein">Alles, was du schon mal selbst dazugeschrieben hast. Zum Nachschauen, ob diesmal was fehlt.</p>
-      ${gruppen}
-    </div>`;
+      </div>${gruppen}`;
   };
 
 
@@ -1376,7 +1393,7 @@
   });
 
   /* ---------------- Navigation ---------------- */
-  const REITER = ['rezepte', 'einkauf', 'lebensmittel'];
+  const REITER = ['rezepte', 'einkauf', 'merkliste', 'lebensmittel'];
   const navigieren = () => {
     const ziel = REITER.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'rezepte';
     REITER.forEach(r => { $('#ansicht-' + r).hidden = r !== ziel; });
@@ -1385,7 +1402,7 @@
   };
 
   const alles = () => {
-    rezepteZeigen(); einkaufZeigen(); lmZeigen();
+    rezepteZeigen(); einkaufZeigen(); merkZeigen(); lmZeigen();
     if (detail) detailZeigen();
   };
 
@@ -1413,7 +1430,7 @@
       merken(d.merkDazu); sichern(); return toast(`Auf der Liste: ${d.merkDazu}`);
     }
     if (d.merkWeg) { Z.merk = Z.merk.filter(m => m.text !== d.merkWeg); return sichern(); }
-    if (t.hasAttribute('data-merk-modus')) { merkBearbeiten = !merkBearbeiten; return einkaufZeigen(); }
+    if (t.hasAttribute('data-merk-modus')) { merkBearbeiten = !merkBearbeiten; return merkZeigen(); }
     if (d.blWeg) { Z.blacklist = Z.blacklist.filter(b => b !== d.blWeg); return sichern(); }
     if (d.blUm) {
       const n = d.blUm.toLowerCase();
