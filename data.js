@@ -95,6 +95,9 @@ window.PREPD = {
     { id: 'kraeuter',   name: 'TK-Kräuter',           gang: 'Gewürze & Öl', einheit: 'EL', g: 5,   n: { kcal: 40,  e: 3,  kh: 4,  f: 1 },   basic: true },
   ],
 
+  // Noahs Auswahl: bis zu vier Lieblingsgerichte (IDs), erscheinen ganz oben im Rezeptbuch.
+  favoriten: ['joghurt-haehnchen-pfanne', 'big-mac-bowl', 'haehnchen-paprika-reis', 'hackfleisch-bowl'],
+
   rezepte: [
     {
       id: 'big-mac-bowl',

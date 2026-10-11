@@ -191,6 +191,15 @@
   }
 
   /* ---------- Rezeptkacheln ---------- */
+  .auswahl { background: var(--honig-hell); border: 1.5px solid var(--honig); border-radius: 22px; padding: 16px 14px 14px; margin-bottom: 22px; }
+  .auswahl[hidden] { display: none; }
+  .auswahl-kopf { display: flex; align-items: center; gap: 9px; margin: 0 2px 12px; }
+  .auswahl-kopf svg { width: 22px; height: 22px; color: var(--honig); flex: none; }
+  .auswahl-kopf h2 { margin: 0; font-size: 19px; line-height: 1.2; }
+  .auswahl-kopf span { color: var(--honig-text); font-size: 13.5px; margin-left: auto; text-align: right; }
+  .auswahl .rezepte { max-width: none; }
+  @media (min-width: 820px) { .auswahl .rezepte { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 1100px) { .auswahl { max-width: 980px; } }
   .rezepte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   @media (min-width: 560px) { .rezepte { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (min-width: 820px) { .rezepte { gap: 18px; } }
@@ -662,6 +671,14 @@
         </select>
       </div>
     </div>
+    <section class="auswahl" id="auswahl" aria-labelledby="auswahl-titel" hidden>
+      <div class="auswahl-kopf">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+        <h2 id="auswahl-titel">Noahs Auswahl</h2>
+        <span>Meine absoluten Favoriten</span>
+      </div>
+      <div class="rezepte" id="auswahl-liste"></div>
+    </section>
     <div class="rezepte" id="rezept-liste"></div>
   </section>
 
@@ -1284,9 +1301,18 @@
     };
     liste.sort(sortierer[filter.sort]);
     sichtbar = liste;
+    // Noahs Auswahl: nur ohne Suche, und dann nicht doppelt im Rest der Liste
+    const fav = (D.favoriten || []).map(id => REZ[id]).filter(Boolean).slice(0, 4);
+    const zeigeAuswahl = fav.length > 0 && !q;
+    $('#auswahl').hidden = !zeigeAuswahl;
+    if (zeigeAuswahl) {
+      $('#auswahl-liste').innerHTML = fav.map(r => rezeptKachel(r, ids)).join('');
+      const favIds = new Set(fav.map(r => r.id));
+      liste = liste.filter(r => !favIds.has(r.id));
+    }
     $('#rezept-liste').innerHTML = liste.length
       ? liste.map(r => rezeptKachel(r, ids)).join('')
-      : `<div class="leer"><strong>Kein Gericht gefunden</strong>Probier einen anderen Suchbegriff oder schalte die Filter aus.</div>`;
+      : zeigeAuswahl ? '' : `<div class="leer"><strong>Kein Gericht gefunden</strong>Probier einen anderen Suchbegriff oder schalte die Filter aus.</div>`;
   };
 
   /* ---------------- Rezept-Detail ---------------- */
