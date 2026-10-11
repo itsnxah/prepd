@@ -393,6 +393,9 @@
   .schritte li { padding: 6px 0 10px 6px; max-width: 62ch; line-height: 1.65; }
   .schritte li::marker { color: var(--terrakotta); font-weight: 700; }
   .zeit-hinweis { color: var(--zeit); white-space: nowrap; }
+  .quelle-link { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 0; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--rahmen); background: var(--papier); color: var(--tinte); font-weight: 650; font-size: 14.5px; text-decoration: none; }
+  .quelle-link svg { width: 16px; height: 16px; flex: none; color: var(--terrakotta); }
+  .quelle-link:hover { background: var(--terrakotta-hell); }
   .notiz { margin: 0; padding: 12px 14px; background: var(--salbei-hell); border-radius: 14px; color: var(--salbei-dunkel); max-width: 62ch; }
   .blatt-aktionen { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; position: sticky; bottom: calc(-24px - env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--papier) 70%, transparent); padding: 14px 0 4px; }
   .blatt-aktionen .knopf { flex: 1 1 auto; padding: 14px 18px; font-size: 16px; border-radius: 14px; }
@@ -1365,6 +1368,7 @@
       <h3>So geht's</h3>
       <ol class="schritte">${r.schritte.map(s => `<li><strong>${esc(s.t)}.</strong> ${esc(s.text)}${s.timer ? ` <span class="zeit-hinweis">· ca. ${Math.round(s.timer / 60)} Min</span>` : ''}</li>`).join('')}</ol>
       ${r.notiz ? `<h3>Notiz</h3><p class="notiz">${esc(r.notiz)}</p>` : ''}
+      ${/^https:\/\//.test(r.tiktok || '') ? `<a class="quelle-link" href="${esc(r.tiktok)}" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7M21 3l-9 9M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>Original auf TikTok ansehen</a>` : ''}
       <div class="blatt-aktionen">
         <button class="knopf zweit" data-kochen="${r.id}" style="flex:1 1 100%">Kochen starten</button>
         ${drin

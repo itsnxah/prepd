@@ -17,6 +17,7 @@
      portionen  Grundmenge (Standard: 2 – wir kochen für zwei)
      zeit       Minuten
      bild       optionaler Pfad zu einem Foto, z. B. 'bilder/hackfleisch-bowl.jpg'
+     tiktok     optional: Link zum Original-TikTok (https://…), erscheint im Rezept als Button
                 (fehlt es, zeichnet die App einen passenden Platzhalter)
      mealPrep   true = gut zum Vorkochen und Mitnehmen
      haltbar    Tage im Kühlschrank
