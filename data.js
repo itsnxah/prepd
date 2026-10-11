@@ -167,6 +167,7 @@ window.PREPD = {
     },
     {
       id: 'lachs-bowl',
+      bild: 'bilder/lachs-bowl.jpg',
       name: 'Lachs-Bowl mit Gurke und Mais',
       portionen: 2, zeit: 25, mealPrep: true, haltbar: 2,
       zutaten: [
